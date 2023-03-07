@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+</div>
+
+<script>
+    const containerWrapper = document.querySelector('.container');
+
+    async function fetchAPI() {
+        let url = '/api/';
+        try {
+            let res = await fetch(url);
+            return await res.json();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    async function wishperAction() {
+        const wishperData = await fetchAPI()
+        containerWrapper.innerHTML += `
+            <p class="fs-3"> ${wishperData} </p>
+        `;
+    };
+    wishperAction();
+</script>
+
+{% endblock %}
