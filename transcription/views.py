@@ -7,6 +7,10 @@ from django.http import JsonResponse
 import os
 import whisper
 
+from rest_framework import viewsets
+
+from .models import MediaField
+from .serializers import FileSerializer
 
 model = whisper.load_model("base")
 
@@ -14,6 +18,11 @@ model = whisper.load_model("base")
 def index(request):
     ''' Initial page render '''
     return render(request, 'index.html')
+
+
+class FileAPIView(viewsets.ModelViewSet):
+    serializer_class = FileSerializer
+    queryset = MediaField.objects.all()
 
 
 # def wishper_json_api(request):
