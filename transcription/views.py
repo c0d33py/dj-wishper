@@ -20,7 +20,7 @@ def index(request):
     return render(request, 'index.html')
 
 
-class FileAPIView(viewsets.ModelViewSet):
+class MediaFieldAPIView(viewsets.ModelViewSet):
     serializer_class = FileSerializer
     queryset = MediaField.objects.all()
 
