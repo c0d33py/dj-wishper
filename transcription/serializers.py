@@ -12,4 +12,4 @@ class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediaField
         fields = ('id', 'transcript', 'upload_file')
-        read_only_fields = ['transcript', ]
+        read_only_fields = ['id', 'transcript', ]
