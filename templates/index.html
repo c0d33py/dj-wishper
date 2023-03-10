@@ -9,24 +9,16 @@
         color: #fff;
     }
 </style>
-
+<title>GetUserMedia demo</title>
 <div class="container">
     <div class="h-100 p-5 text-bg-dark rounded-3">
         <h2>Speech to text APP</h2>
         <p>Real-time transcription playground using the Web Speech.</p>
         <button class="btn btn-outline-light" type="button" id="speechStart">Speech</button>
     </div>
-    <p id="output"></p>
-
-
-    <button id="button" onclick="toggleStartStop()" class="btn btn-outline-light" type="button">Start</button>
-    <div style="border:dotted;padding:10px">
-        <span id="final_span"></span>
-        <span id="interim_span" style="color:grey"></span>
-    </div>
 </div>
 <!-- https://wicg.github.io/speech-api/#dom-speechrecognition-lang -->
-<!-- <script>
+<script>
     const containerWrapper = document.querySelector('.container');
 
     async function fetchAPI() {
@@ -46,49 +38,10 @@
         `;
     };
     wishperAction();
-</script> -->
-
-<script type="text/javascript">
-    var recognizing;
-    var recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    reset();
-    recognition.onend = reset;
-
-    recognition.onresult = function (event) {
-        var final = "";
-        var interim = "";
-        for (var i = 0; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                final += event.results[i][0].transcript;
-            } else {
-                interim += event.results[i][0].transcript;
-            }
-        }
-        final_span.innerHTML = final;
-        interim_span.innerHTML = interim;
-    }
-
-    function reset() {
-        recognizing = false;
-        button.innerHTML = "Click to Speak";
-    }
-
-    function toggleStartStop() {
-        if (recognizing) {
-            recognition.stop();
-            reset();
-        } else {
-            recognition.start();
-            recognizing = true;
-            button.innerHTML = "Click to Stop";
-            final_span.innerHTML = "";
-            interim_span.innerHTML = "";
-        }
-    }
 </script>
-<script>
+
+
+<!-- <script>
     const speechButton = document.getElementById("speechStart");
     const outputElement = document.getElementById("output");
     const recognition = new window.webkitSpeechRecognition();
@@ -129,5 +82,7 @@
     // });
 
 
-</script>
+</script> -->
+
+
 {% endblock %}
