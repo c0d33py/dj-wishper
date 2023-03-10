@@ -23,4 +23,4 @@ class MediaField(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.upload_file
+        return str(self.id)

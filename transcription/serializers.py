@@ -12,4 +12,7 @@ class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediaField
         fields = ('id', 'transcript', 'upload_file')
-        read_only_fields = ['id', 'transcript', ]
+        read_only_fields = ['transcript', ]
+
+    def create(self, validated_data):
+        return MediaField.objects.create(**validated_data)

@@ -7,6 +7,7 @@ from .transcribe import Transcribe
 
 @receiver(post_save, sender=MediaField)
 def save_media_field(sender, instance, created, **kwargs):
+    ''' Run Transcribe '''
     if created:
-        ''' Run Transcribe '''
-        Transcribe.transcribe_file(instance.id)
+        transcriber = Transcribe()  # Initialize
+        transcriber.transcribe_file(str(instance.id))

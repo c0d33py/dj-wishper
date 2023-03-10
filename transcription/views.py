@@ -24,6 +24,10 @@ class MediaFieldAPIView(viewsets.ModelViewSet):
     serializer_class = FileSerializer
     queryset = MediaField.objects.all()
 
+    # def perform_create(self, serializer):
+    #     serializer.save()
+    #     return super().perform_create(serializer)
+
 
 # def wishper_json_api(request):
 #     ''' Wishper speach to text '''
