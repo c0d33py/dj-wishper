@@ -4,8 +4,6 @@ import whisper
 from pydub import AudioSegment
 from asgiref.sync import sync_to_async
 
-
-from .serializers import FileSerializer
 from .models import MediaField
 
 model = whisper.load_model("base")
@@ -22,16 +20,26 @@ class Transcribe:
             new_file_name = file.upload_file.name.replace('.mp4', '.mp3')
             new_file_path = os.path.join(dir_path, new_file_name)
             audio.export(new_file_path, format='mp3')
+            path = new_file_path
         return path
 
-    # @sync_to_async
     def transcribe_file(self, file_id):
         file = MediaField.objects.filter(id=int(file_id)).first()
-        if (not file):
+        if not file:
             return None
+
+        # Get the path of the audio file
         audio_file = Transcribe.get_audio_file(file)
+
+        # Transcribe the audio file
         transcription = model.transcribe(audio_file)
+
+        # Update the transcript field of the MediaField object
         file.transcript = transcription['text'].strip()
         file.save()
-        data = FileSerializer(file).data
-        return data
+
+        # Delete the audio file
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
+
+        return file

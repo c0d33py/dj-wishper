@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_celery_beat',
     'transcription'
 ]
 
@@ -142,3 +143,53 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
+
+
+# Celery Configuration
+# https://github.com/celery/celery/tree/master/examples/django/
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# CELERY_CACHE_BACKEND = 'default'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_STORE_ERRORS_EVEN_IF_IGNORED = True
+CELERY_TIMEZONE = 'Asia/Karachi'
+DJANGO_CRON_MULTITHREADED = True
+
+#####################
+# DATABASE CACHING  #
+#####################
+
+# Default is enabled # TODO
+# To enable tenant aware caching you can set the KEY_FUNCTION setting to use
+# the provided make_key helper function which adds the tenants schema_name as the first key prefix.
+# https://docs.djangoproject.com/en/4.0/topics/cache/
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379',
+#         # 'KEY_FUNCTION': 'django_tenants.cache.make_key',
+#         # 'REVERSE_KEY_FUNCTION': 'django_tenants.cache.reverse_key',
+#     }
+# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+        # 'KEY_FUNCTION': 'django_tenants.cache.make_key',
+        # 'REVERSE_KEY_FUNCTION': 'django_tenants.cache.reverse_key',
+    }
+}
+
+
+# Redis Channel Layer! In this example, Redis is running on localhost (127.0.0.1) port 6379:
+# https://channels.readthedocs.io/en/stable/topics/channel_layers.html#redis-channel-layer
+# CHANNEL_LAYERS = {
+#     'default': {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://localhost:6379/1",
+#         # 'CONFIG': {
+#         #     'hosts': [('127.0.0.1', 6379)],
+#         # },
+#     },
+# }
