@@ -1,4 +1,4 @@
-import openai
+# import openai
 import os
 import torch
 
@@ -11,7 +11,7 @@ from .models import MediaField
 
 # openai.api_key = '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' # TODO Mine
 # openai.api_key = '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' # TODO BOSS
-openai.api_key = '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'  # TODO NEW ACCOUNT
+# openai.api_key = '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'  # TODO NEW ACCOUNT
 model = whisper.load_model("large")
 
 
@@ -63,15 +63,3 @@ class Transcribe:
             os.remove(audio_file)
 
         return file
-
-
-#     temperature: Union[float, Tuple[float, ...]] = (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-#     compression_ratio_threshold: Optional[float] = 2.4,
-#     logprob_threshold: Optional[float] = -1.0,
-#     no_speech_threshold: Optional[float] = 0.6,
-#     condition_on_previous_text: bool = True,
-#     initial_prompt: Optional[str] = None,
-#     word_timestamps: bool = False,
-#     prepend_punctuations: str = "\"'“¿([{-",
-#     append_punctuations: str = "\"'.。,，!！?？:：”)]}、",
-#     **decode_options,
