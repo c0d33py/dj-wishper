@@ -7,7 +7,7 @@ from django.http import JsonResponse
 import os
 import whisper
 
-from rest_framework import viewsets
+from rest_framework import viewsets, pagination
 
 from .models import MediaField
 from .serializers import FileSerializer
@@ -23,6 +23,7 @@ def index(request):
 class MediaFieldAPIView(viewsets.ModelViewSet):
     serializer_class = FileSerializer
     queryset = MediaField.objects.all()
+    pagination_class = [pagination.LimitOffsetPagination]
 
     # def perform_create(self, serializer):
     #     serializer.save()
