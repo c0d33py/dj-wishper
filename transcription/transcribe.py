@@ -12,7 +12,7 @@ from .models import MediaField
 # openai.api_key = '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' # TODO Mine
 # openai.api_key = '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' # TODO BOSS
 # openai.api_key = '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'  # TODO NEW ACCOUNT
-model = whisper.load_model("large")
+model = whisper.load_model("tiny")
 
 
 class Transcribe:

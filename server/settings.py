@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-o95wtyc-afym8%_(%%-n#7l)bau@a0n-2sry0c^xoq%2omybv=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -121,6 +121,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'assets',
+]
 
 # https://docs.djangoproject.com/en/4.1/howto/static-files/#deployment
 # Absolute path to the directory static files should be collected to.
