@@ -25,16 +25,85 @@
     }
 </style>
 
+<style>
+    .file-upload {
+        border: 2px dashed #cccccc50;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .file-upload__label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .file-upload.active {
+        border-color: #666;
+        border-radius: 10px;
+    }
+
+    .file-upload .file-upload__label:after {
+        display: inline-block;
+        margin: 0 5px;
+    }
+
+    .file-upload .file-upload__label:hover,
+    .file-upload.active .file-upload__label {
+        color: #666;
+    }
+
+    .file-upload .file-upload__label:hover:after,
+    .file-upload.active .file-upload__label:after {
+        color: #333;
+    }
+
+    .file-upload #file-upload {
+        display: none;
+    }
+</style>
+
 <title>GetUserMedia demo</title>
 
 <div class="container">
     <div class="h-100 p-5 text-bg-dark rounded-3">
         <h2>Speech to text APP</h2>
         <p>Real-time transcription playground using the Web Speech.</p>
-        <button class="btn btn-outline-light" type="button" id="speechStart">Speech</button>
+        <div class="file-upload">
+            <label for="file-upload" class="file-upload__label">Drag and drop</label>
+            <input id="file-upload" type="file" multiple>
+        </div>
         <div id="output" class="mt-5"></div>
     </div>
 </div>
+
+<script>
+    const fileUpload = document.querySelector('.file-upload');
+
+    fileUpload.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUpload.classList.add('active');
+    });
+
+    fileUpload.addEventListener('dragleave', () => {
+        fileUpload.classList.remove('active');
+    });
+
+    fileUpload.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUpload.classList.remove('active');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+        // show file name into the span tag
+        document.getElementById('file-name').innerHTML = files[0].name;
+
+    });
+
+    const handleFiles = (files) => {
+        // Handle the selected files here
+    };
+</script>
 
 <script>
     const outputWrapper = document.querySelector('#output');
