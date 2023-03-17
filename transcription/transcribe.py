@@ -1,7 +1,9 @@
 # import openai
 import os
-import whisper
-import torch
+import subprocess
+
+from whisper import load_model
+from torch import cuda, device
 from functools import lru_cache
 
 from django.core.files.storage import default_storage
@@ -9,34 +11,60 @@ from django.core.files.storage import default_storage
 from .models import MediaField
 
 
-@lru_cache()
-def transcribe_audio(audio_file_path):
-    model = whisper.load_model('large')
+# @lru_cache(maxsize=1)
+# def load_large_model():
+#     # Set the device to use the first GPU
+#     input_device = device('cuda:0' if cuda.is_available() else 'cpu')
 
-    # Transcribe the audio file using the loaded model
-    transcription = model.transcribe(
-        audio_file_path,
-        fp16=torch.cuda.is_available(),
-        language='urdu'
-    )
+#     print("Loading large model...")
+#     model = load_model("large").to(input_device)
+#     print("Large model loaded")
+#     return model
 
-    return transcription['text'].strip()
+_large_model = None
+
+
+def load_large_model():
+    global _large_model
+
+    if _large_model is None:
+        # Set the device to use the first GPU
+        input_device = device('cuda:0' if cuda.is_available() else 'cpu')
+
+        print("Loading large model...")
+        _large_model = load_model("large").to(input_device)
+        print("Large model loaded")
+
+    return _large_model
 
 
 class Transcribe:
 
     @staticmethod
     def get_audio_file(file):
-        path = default_storage.path(file.upload_file.name)
+        input_path = default_storage.path(file.upload_file.name)
         # Create a new file name
-        new_file_name = path.replace('.mp4', '.wav')
+        output_path = input_path.replace('.mp4', '.wav')
 
-        # Convert the file
-        os.system(f'ffmpeg -y -i {path} {new_file_name}')
+        # Build the command as a list of arguments
+        command = [
+            'ffmpeg',
+            '-y',  # Overwrite output files without asking
+            '-i', input_path,
+            '-vn',  # Disable video recording
+            '-ac', '1',  # Set audio channels to 1 (mono)
+            '-ar', '44100',  # Set audio sample rate to 44.1kHz
+            '-acodec', 'pcm_s16le',  # Set audio codec to PCM 16-bit
+            output_path,
+        ]
 
-        return new_file_name
+        # Use subprocess.run() to execute the command
+        subprocess.run(command, capture_output=True)
+
+        return output_path
 
     def transcribe_file(self, file_id):
+
         file = MediaField.objects.filter(id=int(file_id)).first()
         if not file:
             return None
@@ -44,40 +72,20 @@ class Transcribe:
         # Get the path of the audio file
         audio_file = Transcribe.get_audio_file(file)
 
-        transcription = transcribe_audio(audio_file)
+        # Transcribe the audio file
+        transcription = load_large_model().transcribe(
+            audio_file,
+            language='urdu'
+        )
 
-        file.transcript = transcription
+        # Update the transcript field of the MediaField object
+        file.transcript = transcription['text'].strip()
         file.save()
+
+        # Delete the audio file
         os.remove(audio_file)
 
-        return audio_file
-
-    # def transcribe_files(self, file_id):
-    #     model = whisper.load_model('large')
-    #     torch = lazy_imports('torch')
-
-    #     file = MediaField.objects.filter(id=int(file_id)).first()
-    #     if not file:
-    #         return None
-
-    #     # Get the path of the audio file
-    #     audio_file = Transcribe.get_audio_file(file)
-
-    #     # Transcribe the audio file
-    #     transcription = model.transcribe(
-    #         audio_file,
-    #         fp16=torch.cuda.is_available(),
-    #         language='urdu'
-    #     )
-
-    #     # Update the transcript field of the MediaField object
-    #     file.transcript = transcription['text'].strip()
-    #     file.save()
-
-    #     # Delete the audio file
-    #     os.remove(audio_file)
-
-    #     return file
+        return file
 
     # def transcribe_file(self, file_id):
     #     file = MediaField.objects.filter(id=int(file_id)).first()
