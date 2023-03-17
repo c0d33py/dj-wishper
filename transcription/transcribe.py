@@ -2,40 +2,10 @@
 import os
 import subprocess
 
-from whisper import load_model
-from torch import cuda, device
-from functools import lru_cache
-
 from django.core.files.storage import default_storage
 
+from .model_loader import ModelLoader
 from .models import MediaField
-
-
-# @lru_cache(maxsize=1)
-# def load_large_model():
-#     # Set the device to use the first GPU
-#     input_device = device('cuda:0' if cuda.is_available() else 'cpu')
-
-#     print("Loading large model...")
-#     model = load_model("large").to(input_device)
-#     print("Large model loaded")
-#     return model
-
-_large_model = None
-
-
-def load_large_model():
-    global _large_model
-
-    if _large_model is None:
-        # Set the device to use the first GPU
-        input_device = device('cuda:0' if cuda.is_available() else 'cpu')
-
-        print("Loading large model...")
-        _large_model = load_model("large").to(input_device)
-        print("Large model loaded")
-
-    return _large_model
 
 
 class Transcribe:
@@ -65,25 +35,26 @@ class Transcribe:
 
     def transcribe_file(self, file_id):
 
+        # Get the MediaField object
         file = MediaField.objects.filter(id=int(file_id)).first()
         if not file:
             return None
 
         # Get the path of the audio file
-        audio_file = Transcribe.get_audio_file(file)
+        audio_data = Transcribe.get_audio_file(file)
+
+        # Load the large model
+        model = ModelLoader().get_model()
 
         # Transcribe the audio file
-        transcription = load_large_model().transcribe(
-            audio_file,
-            language='urdu'
-        )
+        transcription = model.transcribe(audio_data, language='urdu')
 
         # Update the transcript field of the MediaField object
         file.transcript = transcription['text'].strip()
         file.save()
 
         # Delete the audio file
-        os.remove(audio_file)
+        os.remove(audio_data)
 
         return file
 
