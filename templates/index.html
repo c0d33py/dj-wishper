@@ -15,9 +15,8 @@
                 <div class="UppyInput-Progress"></div>
             </div>
         </div>
-        <input type="hidden" name="media-uuid" id="media-uuid" multiple>
     </div>
-    <div id="output" class="mt-5"></div>
+    <div id="output" class="mt-4"></div>
 </div>
 {% endblock %}
 
@@ -36,7 +35,9 @@
         const transcribeData = await fetchAPI()
         transcribeData.forEach((item) => {
             outputWrapper.innerHTML += `
-                <p class="ur">${item.transcript}</p>`;
+            <div class="stt-data">
+                <p class="ur">${item.transcript}</p>
+            </div>`;
         });
     };
     wishperAction();
