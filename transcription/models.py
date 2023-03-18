@@ -1,5 +1,6 @@
 from datetime import datetime
-from django.core.validators import FileExtensionValidator
+
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 
@@ -11,10 +12,7 @@ def unique_filename(_, filename):
 
 class MediaField(models.Model):
 
-    upload_file = models.FileField(
-        validators=[FileExtensionValidator(allowed_extensions=['mp3', 'mp4'])],
-        upload_to=unique_filename
-    )
+    upload_file = GenericRelation('django_tus.TusFileModel', related_query_name='media_field')
     transcript = models.TextField()
 
     class Meta:

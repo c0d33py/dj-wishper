@@ -1,8 +1,9 @@
-# import openai
 import os
 import subprocess
 
 from django.core.files.storage import default_storage
+from django.shortcuts import get_object_or_404
+from django_tus.models import TusFileModel
 
 from .model_loader import ModelLoader
 from .models import MediaField
@@ -12,12 +13,21 @@ class Transcribe:
 
     @staticmethod
     def get_audio_file(file):
-        input_path = default_storage.path(file.upload_file.name)
-        # Create a new file name
+        """
+        Converts the uploaded video file to a mono WAV audio file using FFmpeg.
+
+        Args:
+            file (django.core.files.File): The uploaded video file.
+
+        Returns:
+            The path to the converted audio file.
+        """
+        # Set up the input and output paths
+        input_path = default_storage.path(file.uploaded_file.name)
         output_path = input_path.replace('.mp4', '.wav')
 
-        # Build the command as a list of arguments
-        command = [
+        # Build the FFmpeg command as a list of arguments
+        ffmpeg_cmd = [
             'ffmpeg',
             '-y',  # Overwrite output files without asking
             '-i', input_path,
@@ -28,42 +38,47 @@ class Transcribe:
             output_path,
         ]
 
-        # Use subprocess.run() to execute the command
-        subprocess.run(command, capture_output=True)
+        # Execute the FFmpeg command using subprocess.run()
+        subprocess.run(ffmpeg_cmd, capture_output=True, check=True)
 
         return output_path
 
-    def transcribe_file(self, file_id):
+    def transcribe_file(self, file_id: int) -> TusFileModel:
+        """
+        Transcribes the audio file identified by the given `file_id` using a pre-trained model,
+        and updates the transcript field of the corresponding `MediaField` object.
 
-        # Get the MediaField object
-        file = MediaField.objects.filter(id=int(file_id)).first()
-        if not file:
+        Args:
+            file_id (int): The ID of the `TusFileModel` object representing the audio file.
+
+        Returns:
+            The `TusFileModel` object corresponding to the transcribed audio file.
+            None if the `TusFileModel` object does not exist.
+        """
+        # Get the TusFileModel object corresponding to the given file_id
+        tus_file = get_object_or_404(TusFileModel, guid=file_id)
+
+        if tus_file is None:
             return None
 
-        # Get the path of the audio file
-        audio_data = Transcribe.get_audio_file(file)
+        # Convert the audio file to a mono WAV audio file
+        audio_data = Transcribe.get_audio_file(tus_file)
 
-        # Load the large model
+        # Load the pre-trained transcription model
         model = ModelLoader().get_model()
 
-        # Transcribe the audio file
+        # Transcribe the audio file using the model
         transcription = model.transcribe(audio_data, language='urdu')
 
-        # Update the transcript field of the MediaField object
-        file.transcript = transcription['text'].strip()
-        file.save()
+        # Create a new MediaField object for the transcribed text
+        transcribe_instance = MediaField.objects.create(transcript=transcription['text'].strip())
 
-        # Delete the audio file
+        # Update the TusFileModel object to reference the MediaField object
+        tus_file.content_object = transcribe_instance
+        tus_file.save()
+
+        # Delete the temporary audio file
         os.remove(audio_data)
 
-        return file
-
-    # def transcribe_file(self, file_id):
-    #     file = MediaField.objects.filter(id=int(file_id)).first()
-
-    #     filepath = os.path.join(f'media{file.upload_file.url}')
-    #     # Note: you need to be using OpenAI Python v0.27.0 for the code below to work
-    #     with open(filepath, "rb") as f:
-    #         transcript = openai.Audio.transcribe("whisper-1", f)
-    #         file.transcript = transcript['text']
-    #         file.save()
+        # Return the TusFileModel object
+        return tus_file

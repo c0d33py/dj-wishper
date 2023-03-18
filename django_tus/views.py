@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django_tus.conf import settings
 from django_tus.models import TusFileModel
 from django_tus.response import TusResponse
+from django_tus.signals import tus_upload_finished_signal
 from django_tus.tusfile import TusFile, TusChunk, FilenameGenerator
 from pathvalidate._filename import is_valid_filename
 
@@ -107,9 +108,21 @@ class TusUpload(views.APIView):
             tus_file.rename()
             tus_file.clean()
 
+            self.send_signal(tus_file)
             self.finished()
 
         return TusResponse(status=status.HTTP_204_NO_CONTENT, extra_headers={'Upload-Offset': tus_file.offset})
+
+    def send_signal(self, tus_file):
+        tus_upload_finished_signal.send(
+            sender=self.__class__,
+            resource_id=tus_file.resource_id,
+            metadata=tus_file.metadata,
+            filename=tus_file.filename,
+            upload_file_path=tus_file.get_path(),
+            file_size=tus_file.file_size,
+            upload_url=settings.TUS_UPLOAD_URL,
+            destination_folder=settings.TUS_DESTINATION_DIR)
 
     def validate_filename(self, metadata):
         filename = metadata.get("filename", "")
