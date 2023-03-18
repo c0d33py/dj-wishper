@@ -14,7 +14,8 @@ class ModelLoader:
 
     def load_model(self):
         # Set the device to use the first GPU
-        input_device = device('cuda:0' if cuda.is_available() else 'cpu')
+        # input_device = device('cuda:0' if cuda.is_available() else 'cpu')
+        input_device = device('cpu')
 
         print("Loading large model...")
         self.model = load_model("large").to(input_device)

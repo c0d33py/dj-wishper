@@ -23,7 +23,7 @@ class Transcribe:
             The path to the converted audio file.
         """
         # Set up the input and output paths
-        input_path = default_storage.path(file.uploaded_file.name)
+        input_path = default_storage.path(file)
         output_path = input_path.replace('.mp4', '.wav')
 
         # Build the FFmpeg command as a list of arguments
@@ -56,13 +56,13 @@ class Transcribe:
             None if the `TusFileModel` object does not exist.
         """
         # Get the TusFileModel object corresponding to the given file_id
-        tus_file = get_object_or_404(TusFileModel, guid=file_id)
+        tus_file = get_object_or_404(TusFileModel.objects.only('guid'), guid=file_id)
 
         if tus_file is None:
             return None
 
         # Convert the audio file to a mono WAV audio file
-        audio_data = Transcribe.get_audio_file(tus_file)
+        audio_data = Transcribe.get_audio_file(tus_file.uploaded_file.name)
 
         # Load the pre-trained transcription model
         model = ModelLoader().get_model()
