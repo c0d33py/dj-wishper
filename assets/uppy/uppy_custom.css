@@ -1,11 +1,11 @@
 /* Uppy Custom Style input */
 .uppy-FileInput-btn {
-    border: 1px solid #549dc7 !important;
-    color: #549dc7 !important;
+    border: 1px solid #3b956f !important;
+    color: #3b956f !important;
 }
 
 .uppy-FileInput-btn:hover {
-    background-color: #549dc7 !important;
+    background-color: #3b956f !important;
     color: #fff !important;
 }
 
@@ -15,12 +15,12 @@
 }
 
 .uppy-StatusBar {
-    background-color: #262b31;
+    background-color: #242424;
     color: #fff;
 }
 
 .uppy-StatusBar-progress {
-    background-color: #549dc7;
+    background-color: #3b956f;
     height: 5px;
 }
 

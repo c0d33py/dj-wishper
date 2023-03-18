@@ -4,44 +4,20 @@
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
 
-<style>
-    .ur {
-        font-family: Nafees Nastaleeq;
-        font-style: normal;
-        font-weight: normal;
-        line-height: 2.2;
-        white-space: pre-wrap;
-        font-size: 20px;
-    }
 
-    .listening {
-        background-color: brown;
-        border: 1px solid brown;
-        color: #fff;
-    }
-
-    #output p {
-        padding: 10px;
-        border: 1px solid #aaaaaa60;
-        border-radius: 10px;
-    }
-</style>
-
-<div class="container">
-    <div class="h-100 p-5 text-bg-dark rounded-3">
-        <h2>CBSTT</h2>
-        <p>Real-time transcription playground.</p>
-        <div class="file-upload">
-            <div class="grid">
-                <div class="column-full">
-                    <div class="UppyInput"></div>
-                    <div class="UppyInput-Progress"></div>
-                </div>
+<div class="container-fluid h-100 py-5 text-bg-dark rounded-3">
+    <h2>CBSTT</h2>
+    <p>Real-time transcription playground.</p>
+    <div class="file-upload">
+        <div class="grid">
+            <div class="column-full">
+                <div class="UppyInput"></div>
+                <div class="UppyInput-Progress"></div>
             </div>
-            <input type="hidden" name="media-uuid" id="media-uuid" multiple>
         </div>
-        <div id="output" class="mt-5"></div>
+        <input type="hidden" name="media-uuid" id="media-uuid" multiple>
     </div>
+    <div id="output" class="mt-5"></div>
 </div>
 {% endblock %}
 
