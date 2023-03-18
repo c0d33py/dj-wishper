@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_celery_beat',
-    'transcription'
+    'transcription',
+    'django_tus',
 ]
 
 MIDDLEWARE = [
@@ -102,6 +103,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# login redirect
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -131,6 +136,19 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Django Max Upload Size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 4294967296  # 4GB
+
+# Django Tus Upload Config
+TUS_DESTINATION_DIR = BASE_DIR / 'media'
+
+# Django Tus Upload Config
+TUS_UPLOAD_DIR = 'tus_upload'
+TUS_FINAL_DIR = 'uploads/'
+TUS_FILE_NAME_FORMAT = 'random'  # Other options are: 'random-suffix', 'random', 'keep'
+TUS_EXISTING_FILE = 'random'  # Other options are: 'overwrite',  'error', 'rename'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

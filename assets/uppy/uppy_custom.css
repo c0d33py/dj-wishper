@@ -1,0 +1,33 @@
+/* Uppy Custom Style input */
+.uppy-FileInput-btn {
+    border: 1px solid #549dc7 !important;
+    color: #549dc7 !important;
+}
+
+.uppy-FileInput-btn:hover {
+    background-color: #549dc7 !important;
+    color: #fff !important;
+}
+
+.uppy-StatusBar:before {
+    background-color: #434343;
+    height: 5px;
+}
+
+.uppy-StatusBar {
+    background-color: #262b31;
+    color: #fff;
+}
+
+.uppy-StatusBar-progress {
+    background-color: #549dc7;
+    height: 5px;
+}
+
+.uppy-StatusBar.is-complete .uppy-StatusBar-progress {
+    background-color: #217f38;
+}
+
+.uppy-StatusBar-content {
+    color: #a9a9a9;
+}

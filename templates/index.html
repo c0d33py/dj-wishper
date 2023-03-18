@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block body %}
-
+<link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
 
 <style>
     .ur {
@@ -25,86 +27,25 @@
     }
 </style>
 
-<style>
-    .file-upload {
-        border: 2px dashed #cccccc50;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        cursor: pointer;
-    }
-
-    .file-upload__label {
-        display: block;
-        margin-bottom: 10px;
-    }
-
-    .file-upload.active {
-        border-color: #666;
-        border-radius: 10px;
-    }
-
-    .file-upload .file-upload__label:after {
-        display: inline-block;
-        margin: 0 5px;
-    }
-
-    .file-upload .file-upload__label:hover,
-    .file-upload.active .file-upload__label {
-        color: #666;
-    }
-
-    .file-upload .file-upload__label:hover:after,
-    .file-upload.active .file-upload__label:after {
-        color: #333;
-    }
-
-    .file-upload #file-upload {
-        display: none;
-    }
-</style>
-
-<title>GetUserMedia demo</title>
-
 <div class="container">
     <div class="h-100 p-5 text-bg-dark rounded-3">
-        <h2>Speech to text APP</h2>
-        <p>Real-time transcription playground using the Web Speech.</p>
+        <h2>CBSTT</h2>
+        <p>Real-time transcription playground.</p>
         <div class="file-upload">
-            <label for="file-upload" class="file-upload__label">Drag and drop</label>
-            <input id="file-upload" type="file" multiple>
+            <div class="grid">
+                <div class="column-full">
+                    <div class="UppyInput"></div>
+                    <div class="UppyInput-Progress"></div>
+                </div>
+            </div>
+            <input type="hidden" name="media-uuid" id="media-uuid" multiple>
         </div>
         <div id="output" class="mt-5"></div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    const fileUpload = document.querySelector('.file-upload');
-
-    fileUpload.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUpload.classList.add('active');
-    });
-
-    fileUpload.addEventListener('dragleave', () => {
-        fileUpload.classList.remove('active');
-    });
-
-    fileUpload.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUpload.classList.remove('active');
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-        // show file name into the span tag
-        document.getElementById('file-name').innerHTML = files[0].name;
-
-    });
-
-    const handleFiles = (files) => {
-        // Handle the selected files here
-    };
-</script>
-
+{% block extrascripts %}
 <script>
     const outputWrapper = document.querySelector('#output');
 
@@ -124,50 +65,51 @@
     };
     wishperAction();
 </script>
+<script type="module">
+    const windowPath = window.location.href;
+    function stripQueryStringAndHashFromPath(URL) {
+        return URL.split("vnr")[0].split("#")[0];
+    };
 
-
-<!-- <script>
-    const speechButton = document.getElementById("speechStart");
-    const outputElement = document.getElementById("output");
-    const recognition = new window.webkitSpeechRecognition();
-
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    speechButton.addEventListener("mousedown", function () {
-        this.classList.add("btn-outline-danger");
-        this.classList.remove("btn-outline-light");
-        this.textContent = 'Stop'
-        // recognition.start();
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
+    const uppy = new Uppy({
+        debug: false,
+        autoProceed: true,
+        restrictions: {
+            allowedFileTypes: ['video/*', '.mkv',]
+        }
     });
-
-    speechButton.addEventListener("mouseup", () => {
-        speechButton.classList.remove("btn-outline-danger");
-        speechButton.classList.add("btn-outline-light");
-        speechButton.textContent = 'Speech'
-
-        // recognition.stop();
-    });
-
-    recognition.addEventListener("result", function (event) {
-        const result = event.results[event.results.length - 1][0].transcript;
-        outputElement.textContent = result;
-    });
-
-
-
-    // fetch('/transcription/', {
-    //     method: 'POST',
-    //     body: JSON.stringify({ transcript }),
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-    //     },
-    // });
-
-
-</script> -->
-
-
-{% endblock %}
+    uppy
+        .use(FileInput, { target: '.UppyInput', pretty: true })
+        .use(Tus, {
+            endpoint: stripQueryStringAndHashFromPath(windowPath) + "api/upload/",
+            headers: { 'X-CSRFToken': csrftoken },
+            chunkSize: parseInt(5242880, 10),
+            retryDelays: [0, 1000, 3000, 5000],
+        })
+        .use(StatusBar, {
+            target: '.UppyInput-Progress',
+            hideUploadButton: true,
+            hideAfterFinish: false,
+        });
+    uppy.on('complete', (result) => {
+        console.log('Upload complete! We’ve uploaded these files:', result.successful)
+    })
+</script>
+{% endblock extrascripts %}

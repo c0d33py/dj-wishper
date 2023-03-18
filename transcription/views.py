@@ -1,4 +1,6 @@
 from django.shortcuts import render
+# login required decorator
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import viewsets, pagination
 
@@ -11,6 +13,7 @@ class CustomPagination(pagination.PageNumberPagination):
     max_page_size = 50
 
 
+@login_required
 def index(request):
     ''' Initial page render '''
     return render(request, 'index.html')

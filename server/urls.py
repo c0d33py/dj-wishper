@@ -21,7 +21,10 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('transcription.urls'))
+    path('', include('transcription.urls')),
+    path('api/', include('django_tus.urls')),
+    # Login and Logout
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
 if settings.DEBUG:
