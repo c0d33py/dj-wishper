@@ -132,3 +132,46 @@
 .navbar .dropdown-menu-dark {
     --bs-dropdown-link-active-bg: #333333 !important;
 }
+
+.stt-data {
+    position: relative;
+}
+
+.delete-transcript-btn {
+    display: none;
+    background-color: #731111;
+    padding: 10px;
+    border: 0;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.stt-data:hover .delete-transcript-btn {
+    display: block;
+    opacity: 1;
+}
+
+.form-check-input {
+    border: 0;
+}
+
+.form-check-input:checked {
+    background-color: #0b6841;
+}
+
+.form-check-input:checked:focus {
+    box-shadow: none;
+}
+
+.form-check-input:not(:checked) {
+    background-color: #333333;
+}
+
+.form-check-input:not(:checked):focus {
+    box-shadow: none;
+}

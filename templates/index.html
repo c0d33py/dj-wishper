@@ -4,14 +4,20 @@
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
 
-
-<div class="container-fluid h-100 py-5 text-bg-dark rounded-3">
+<div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
     <div class="file-upload">
         <div class="grid">
             <div class="column-full">
-                <div class="UppyInput"></div>
+                <div class="d-flex justify-content-md-between">
+                    <div class="UppyInput"></div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" name="transcriptionswitch"
+                            id="flexSwitchCheckChecked" checked>
+                        <label class="form-check-label" for="flexSwitchCheckChecked">Transcription</label>
+                    </div>
+                </div>
                 <div class="UppyInput-Progress"></div>
             </div>
         </div>
@@ -20,50 +26,15 @@
 </div>
 {% endblock %}
 
+
 {% block extrascripts %}
-<script>
-    const outputWrapper = document.querySelector('#output');
-
-    async function fetchAPI() {
-        let url = '/api/files/';
-        let res = await fetch(url);
-        let data = await res.json();
-        return data.results;
-    };
-
-    async function wishperAction() {
-        const transcribeData = await fetchAPI()
-        transcribeData.forEach((item) => {
-            outputWrapper.innerHTML += `
-            <div class="stt-data">
-                <p class="ur">${item.transcript}</p>
-            </div>`;
-        });
-    };
-    wishperAction();
-</script>
 <script type="module">
-    const windowPath = window.location.href;
-    function stripQueryStringAndHashFromPath(URL) {
-        return URL.split("vnr")[0].split("#")[0];
-    };
+    import { getCookie } from "/static/js/cookie.js"
+    import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    const windowPath = window.location.href;
     const csrftoken = getCookie('csrftoken');
+
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
     const uppy = new Uppy({
         debug: false,
