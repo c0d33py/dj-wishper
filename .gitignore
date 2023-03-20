@@ -3,3 +3,4 @@ __pycache__/
 media/
 media_files/
 tus_upload/
+whisper-large-v2-ct2-int8_float16/

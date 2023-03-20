@@ -1,5 +1,6 @@
 from torch import device, cuda
-from whisper import load_model
+# from whisper import load_model
+from faster_whisper import WhisperModel
 
 
 class ModelLoader:
@@ -18,8 +19,10 @@ class ModelLoader:
         input_device = device('cpu')
 
         print("Loading large model...")
-        self.model = load_model("large").to(input_device)
+        model_path = "model/whisper-large-v2-ct2-int8_float16/"
+        # self.model = load_model("tiny").to(input_device)
         print("Large model loaded")
+        self.model = WhisperModel(model_path, device="cpu", compute_type="int8")
 
     def get_model(self):
         if self.model is None:
