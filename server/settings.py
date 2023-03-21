@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'transcription',
     'django_tus',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'server.wsgi.application'
+ASGI_APPLICATION = 'server.asgi.application'
 
 
 # Database

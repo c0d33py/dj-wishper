@@ -60,4 +60,34 @@
         console.log('Upload complete! We’ve uploaded these files:', result.successful)
     })
 </script>
+
+<script>
+    // write to connect to websocket
+    // const socket = new WebSocket(
+    //     'ws://' + window.location.host +
+    //     '/ws/' + window.location.pathname.split("/").pop() + '/'
+    // );
+
+    // // write to connect to websocket
+    // socket.onmessage = function (e) {
+    //     const data = JSON.parse(e.data);
+    //     const message = data['message'];
+    //     const transcription = data['transcription'];
+    //     const output = document.getElementById('output');
+    //     if (transcription) {
+    //         output.innerHTML = transcription;
+    //     } else {
+    //         output.innerHTML = message;
+    //     }
+    // };
+
+    var socket = new WebSocket("ws://localhost:8000/ws/mysocket/");
+
+    socket.onmessage = function (event) {
+        console.log(event.data);
+    };
+
+    socket.send("Hello, world!");
+
+</script>
 {% endblock extrascripts %}
