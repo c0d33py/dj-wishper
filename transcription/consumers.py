@@ -22,7 +22,7 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         from .transcribe import Transcribe
         model_path = "model/whisper-large-v2-ct2-int8_float16/"
         print("Loading large model...")
-        self.model = WhisperModel(model_path, device="cpu", compute_type="int8")
+        self.model = WhisperModel(model_path, device="cuda", compute_type="int8")
         print("Large model loaded!")
         self.transcribe = Transcribe()
 
@@ -55,6 +55,7 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         paragraph = ""
         # Send the transcription to the client
         for segment in segments:
+            print(segment.text)
             paragraph += segment.text + " "
 
         await self.send(
