@@ -12,8 +12,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.shortcuts import get_object_or_404
 from django.apps import apps
 
-
-from transcription.model_loader import ModelLoader
+from faster_whisper import WhisperModel
 
 
 class TranscriptConsumer(AsyncJsonWebsocketConsumer):
@@ -21,6 +20,10 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self):
         super().__init__()
         from .transcribe import Transcribe
+        model_path = "model/whisper-large-v2-ct2-int8_float16/"
+        print("Loading large model...")
+        self.model = WhisperModel(model_path, device="cpu", compute_type="int8")
+        print("Large model loaded!")
         self.transcribe = Transcribe()
 
     async def connect(self):
@@ -46,11 +49,8 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         # Convert the audio file to a mono WAV audio file
         audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
 
-        # Load the pre-trained transcription model
-        model = await sync_to_async(ModelLoader().get_model)()
-
         # Transcribe the audio file
-        segments, info = model.transcribe(audio_data, beam_size=5)
+        segments, info = self.model.transcribe(audio_data, beam_size=5)
 
         paragraph = ""
         # Send the transcription to the client
