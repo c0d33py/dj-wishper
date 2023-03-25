@@ -6,5 +6,5 @@ class TranscriptionConfig(AppConfig):
     name = 'transcription'
 
     def ready(self):
-        # Implicitly connect signal handlers decorated with @receiver.
-        from . import signals
+        '''Implicitly connect signal handlers decorated with @receiver.'''
+        # from . import signals

@@ -35,25 +35,25 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         file_id = content['file_id']
 
         # Get the model dynamically
-        # TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
+        TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
 
-        # # Get the TusFileModel object corresponding to the given file_id
-        # tus_file = await sync_to_async(get_object_or_404)(TusFileModel, pk=file_id)
+        # Get the TusFileModel object corresponding to the given file_id
+        tus_file = await sync_to_async(get_object_or_404)(TusFileModel, guid=file_id)
 
-        # if tus_file is None:
-        #     return None
+        if tus_file is None:
+            return None
 
-        # # Convert the audio file to a mono WAV audio file
-        # audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
+        # Convert the audio file to a mono WAV audio file
+        audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
 
-        # # Load the pre-trained transcription model
-        # model = await sync_to_async(ModelLoader().get_model)()
+        # Load the pre-trained transcription model
+        model = await sync_to_async(ModelLoader().get_model)()
 
-        # # Transcribe the audio file
-        # segments, info = model.transcribe(audio_data, beam_size=5)
+        # Transcribe the audio file
+        segments, info = model.transcribe(audio_data, beam_size=5)
 
-        # # Send the transcription to the client
-        # for segment in segments:
-        await self.send(
-            json.dumps({'transcript': 'The word so they know Charlie said the general what sir just then asked the chubby'})
-        )
+        # Send the transcription to the client
+        for segment in segments:
+            await self.send(
+                json.dumps({'transcript': segment.text})
+            )
