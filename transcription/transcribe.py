@@ -36,7 +36,7 @@ class Transcribe:
             '-i', input_path,
             '-vn',  # Disable video recording
             '-ac', '1',  # Set audio channels to 1 (mono)
-            '-ar', '44100',  # Set audio sample rate to 44.1kHz
+            '-ar', '16000',  # Set audio sample rate to 44.1kHz
             '-acodec', 'pcm_s16le',  # Set audio codec to PCM 16-bit
             output_path,
         ]

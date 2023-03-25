@@ -5,7 +5,7 @@
     The consumer will be called by the websocket url in the urls.py file. The consumer will then
     call the transcribe_file method in the transcribe.py file to transcribe the audio file.
 '''
-
+import os
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -52,8 +52,26 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         # Transcribe the audio file
         segments, info = model.transcribe(audio_data, beam_size=5)
 
+        paragraph = ""
         # Send the transcription to the client
         for segment in segments:
-            await self.send(
-                json.dumps({'transcript': segment.text})
-            )
+            paragraph += segment.text + " "
+
+        await self.send(
+            json.dumps({'transcript': paragraph})
+        )
+
+        # Get app model
+        MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
+        # Create a new MediaField object for the transcribed text
+        transcribe_instance = await sync_to_async(MediaField.objects.create)(transcript=paragraph)
+
+        # Update the TusFileModel object to reference the MediaField object
+        tus_file.content_object = transcribe_instance
+        await sync_to_async(tus_file.save)()
+
+        # Delete the temporary audio file
+        await sync_to_async(os.remove)(audio_data)
+
+        # Close the connection
+        await self.close()
