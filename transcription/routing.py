@@ -11,6 +11,7 @@ The path object takes two arguments:
 '''
 
 from django.urls import path
+
 from transcription.consumers import TranscriptConsumer
 
 wesocket_routing = [
