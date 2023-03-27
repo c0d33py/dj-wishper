@@ -3,6 +3,101 @@
 {% block body %}
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
+<style>
+    .haPMuQ {
+        position: relative;
+        width: 50px;
+        height: 50px;
+        margin-bottom: 25px;
+        animation: 10s ease 0s infinite normal none running hYVTBr;
+    }
+
+    .fCVRE {
+        float: left;
+        clear: right;
+        margin: 3.33333px;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        background-color: rgb(75, 76, 86);
+        animation-name: iPPwwe;
+        animation-direction: alternate;
+        animation-duration: 800ms;
+        animation-iteration-count: infinite;
+    }
+
+    .fCVRE:nth-child(1) {
+        animation-delay: 200ms;
+    }
+
+    .fCVRE:nth-child(2) {
+        animation-delay: 400ms;
+    }
+
+    .fCVRE:nth-child(3) {
+        animation-delay: 600ms;
+    }
+
+    .fCVRE:nth-child(4) {
+        animation-delay: 400ms;
+    }
+
+    .fCVRE:nth-child(5) {
+        animation-delay: 600ms;
+    }
+
+    .fCVRE:nth-child(6) {
+        animation-delay: 800ms;
+    }
+
+    .fCVRE:nth-child(7) {
+        animation-delay: 600ms;
+    }
+
+    .fCVRE:nth-child(8) {
+        animation-delay: 800ms;
+    }
+
+    .fCVRE:nth-child(9) {
+        animation-delay: 1s;
+    }
+
+    @keyframes hYVTBr {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        25% {
+            transform: rotate(90deg);
+        }
+
+        50% {
+            transform: rotate(180deg);
+        }
+
+        75% {
+            transform: rotate(270deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes iPPwwe {
+        0% {
+            transform: scale(1, 1);
+            opacity: 1;
+            background-color: rgb(0, 255, 137);
+        }
+
+        100% {
+            transform: scale(0, 0);
+            opacity: 0;
+            background-color: rgb(75, 76, 86);
+        }
+    }
+</style>
 
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
@@ -12,6 +107,19 @@
             <div class="column-full">
                 <div class="d-flex justify-content-md-between">
                     <div class="UppyInput"></div>
+                    <div class="progress-transcript" style="display: none;">
+                        <div size="50" class="whisper__Wrapper-k8uff3-0 haPMuQ">
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                            <div size="50" class="whisper__Ball-k8uff3-1 fCVRE"></div>
+                        </div>
+                    </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" name="transcriptionswitch"
                             id="flexSwitchCheckChecked" checked>
@@ -22,6 +130,7 @@
             </div>
         </div>
     </div>
+
     <div id="output" class="mt-4"></div>
 </div>
 {% endblock %}
@@ -58,10 +167,11 @@
         });
     uppy.on('complete', (result) => {
         result.successful.forEach(index => {
+            document.querySelector('.progress-transcript').style.display = 'inline-block';
             const uploadURL = index.response.uploadURL;
             handleWebSocketConnection(uploadURL);
         });
-    })
+    });
     uppy.on('upload-error', (file, error, response) => {
         console.log(error);
     });
@@ -80,11 +190,11 @@
         // Listen for the 'close' event, which indicates that the WebSocket connection has been closed
         socket.addEventListener('close', () => {
             console.log('WebSocket disconnected');
+            document.querySelector('.progress-transcript').style.display = 'none';
         });
         // Listen for the 'message' event, which indicates that a message has been received over the WebSocket connection
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
-            console.log(data.transcript)
             const output = document.getElementById('output');
             // Prepend the data to the output element's <p> tag
             const sttData = document.createElement('div');
@@ -93,75 +203,14 @@
             <p class="ur">${data.transcript}</p>
             <button type="button" class="delete-transcript-btn" data-target="${data.id}">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5.05063 8.73418C4.20573 7.60763 5.00954 6 6.41772 6H17.5823C18.9905 6 19.7943 7.60763 18.9494 8.73418V8.73418C18.3331 9.55584 18 10.5552 18 11.5823V18C18 20.2091 16.2091 22 14 22H10C7.79086 22 6 20.2091 6 18V11.5823C6 10.5552 5.66688 9.55584 5.05063 8.73418V8.73418Z" stroke="white" stroke-width="1.5"/>
-                <path opacity="0.3" d="M14 17L14 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path opacity="0.3" d="M10 17L10 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path opacity="0.3" d="M16 6L15.4558 4.36754C15.1836 3.55086 14.4193 3 13.5585 3H10.4415C9.58066 3 8.81638 3.55086 8.54415 4.36754L8 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M5.05063 8.73418C4.20573 7.60763 5.00954 6 6.41772 6H17.5823C18.9905 6 19.7943 7.60763 18.9494 8.73418V8.73418C18.3331 9.55584 18 10.5552 18 11.5823V18C18 20.2091 16.2091 22 14 22H10C7.79086 22 6 20.2091 6 18V11.5823C6 10.5552 5.66688 9.55584 5.05063 8.73418V8.73418Z" stroke="white" stroke-width="1.5"/>
+                    <path opacity="0.3" d="M14 17L14 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path opacity="0.3" d="M10 17L10 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path opacity="0.3" d="M16 6L15.4558 4.36754C15.1836 3.55086 14.4193 3 13.5585 3H10.4415C9.58066 3 8.81638 3.55086 8.54415 4.36754L8 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
             </button>`;
             output.insertBefore(sttData, output.firstChild);
         });
     }
-    //     // Listen for the 'message' event, which indicates that a message has been received over the WebSocket connection
-    //     socket.addEventListener('message', (event) => {
-    //         const data = JSON.parse(event.data);
-    //         const transcript = data.transcript;
-
-    //         // Split the transcript into individual words
-    //         const words = transcript.split(' ');
-
-    //         // Create a new <div> element to hold the words
-    //         const sttData = document.createElement('div');
-    //         sttData.classList.add('stt-data');
-
-    //         // Create a new <p> element to hold the current word
-    //         const currentWord = document.createElement('p');
-    //         currentWord.classList.add('ur');
-
-    //         // Add the first word to the <p> element
-    //         currentWord.textContent = words[0];
-
-    //         // Add the <p> element to the <div> element
-    //         sttData.appendChild(currentWord);
-
-    //         // Add the "delete transcript" button with an SVG icon
-    //         const deleteTranscriptBtn = document.createElement('button');
-    //         deleteTranscriptBtn.classList.add('delete-transcript-btn');
-    //         deleteTranscriptBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6h-3.586l-.707-.707c-.293-.293-.677-.293-.97 0l-1.414 1.414c-.293.293-.293.677 0 .97l.707.707H8.586l.707-.707c.293-.293.293-.677 0-.97L8.229 5.293c-.293-.293-.677-.293-.97 0L5.845 6.707c-.293.293-.293.677 0 .97l.707.707V9c0 .552.448 1 1 1h10c.552 0 1-.448 1-1V7.414l.707-.707c.293-.293.677-.293.97 0l1.414 1.414c.293.293.293.677 0 .97l-.707.707H19c.552 0 1-.448 1-1V7c0-.552-.448-1-1-1z"/></svg>';
-    //         deleteTranscriptBtn.addEventListener('click', () => {
-    //             sttData.remove();
-    //         });
-    //         sttData.appendChild(deleteTranscriptBtn);
-
-    //         // Add the <div> element to the output container
-    //         const output = document.getElementById('output');
-    //         output.insertBefore(sttData, output.firstChild);
-
-    //         let i = 1; // Start at the second word
-    //         const interval = setInterval(() => {
-    //             // Add the next word to the <p> element
-    //             currentWord.textContent += ` ${words[i]}`;
-    //             i++;
-
-    //             // If all words have been added, clear the interval and exit the function
-    //             if (i >= words.length) {
-    //                 clearInterval(interval);
-    //                 return;
-    //             }
-
-    //             // If there are more words to add, create a new <p> element to hold the next word
-    //             const nextWord = document.createElement('p');
-    //             nextWord.classList.add('ur');
-    //             nextWord.textContent = words[i];
-
-    //             // Add the new <p> element to the <div> element
-    //             sttData.appendChild(nextWord);
-
-    //             // Scroll to the bottom of the output container so the new words are visible
-    //             output.scrollTop = output.scrollHeight;
-    //         }, 50); // Wait 500 milliseconds between each word
-    //     });
-
-    // }
 </script>
 {% endblock extrascripts %}
