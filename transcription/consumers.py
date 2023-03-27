@@ -55,7 +55,6 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         paragraph = ""
         # Send the transcription to the client
         for segment in segments:
-            print(segment.text)
             paragraph += segment.text + " "
 
         await self.send(
