@@ -12,6 +12,17 @@ async function fetchAPI() {
     return data.results;
 };
 
+// Language check
+function languageCheck() {
+    const paragraphs = document.querySelectorAll('.stt-data p');
+    for (let i = 0; i < paragraphs.length; i++) {
+        const text = paragraphs[i].innerText;
+        if (/^[a-zA-Z\s]+$/.test(text)) {
+            paragraphs[i].classList.remove('ur');
+        }
+    }
+};
+
 // Strip query string and hash from path
 export function stripQueryStringAndHashFromPath(URL) {
     return URL.split("vnr")[0].split("#")[0];
@@ -40,6 +51,7 @@ async function getSTTData() {
                 </button>
             </div>`;
     });
+    languageCheck();
 };
 
 // Delete transcript

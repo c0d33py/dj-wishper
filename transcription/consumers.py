@@ -24,11 +24,9 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
         self.transcribe = Transcribe()
 
     async def connect(self):
-        print('connected')
         await self.accept()
 
     async def disconnect(self, close_node):
-        print('disconnected')
         await self.close()
 
     async def receive_json(self, content):
@@ -38,14 +36,14 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
             transcription = content['transcription']
             cuda = content['cuda']
         except KeyError as e:
-            print(f"Missing key: {e}")
+            await self.send(json.dumps({'alrt': f"Missing {e} key", 'type': 'danger'}))
             return
 
         if transcription:
             # Get cuda device if cuda is true and set the cuda device
             device = 'cuda' if cuda else 'cpu'
             model = WhisperModel(self.model_path, device=device, compute_type="int8")
-            print(f"{device.upper()} device set!")
+            await self.send(json.dumps({'alrt': f"Using {device} device", 'type': 'info'}))
 
             # Get the model dynamically
             TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
@@ -63,7 +61,11 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
             for segment in segments:
                 paragraph += segment.text + " "
 
-            await self.send(json.dumps({'transcript': paragraph}))
+            await self.send(json.dumps({
+                'transcript': paragraph,
+                'alrt': 'Transcription complete',
+                'type': 'success'
+            }))
 
             # Update the TusFileModel object to reference the MediaField object
             MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
@@ -76,4 +78,6 @@ class TranscriptConsumer(AsyncJsonWebsocketConsumer):
 
             # Close the connection
             await self.close()
-            return
+        else:
+            await self.send(json.dumps({'alrt': 'Transcription is disabled', 'type': 'warning'}))
+            await self.close()
