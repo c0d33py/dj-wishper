@@ -36,6 +36,7 @@
             <div class="column-full">
                 <div class="d-flex justify-content-md-between">
                     <div class="UppyInput"></div>
+                    {% include 'loader.html' %}
                     <div class="dropdown">
                         <button class="btn" id="configBtn" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                             data-bs-auto-close="outside">
@@ -51,10 +52,11 @@
                             </svg>
                         </button>
                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" style="width: 240px;">
-                            <form class="px-4 py-2">
+                            <form class="px-4 py-2" id="configForm" method="post">
                                 <div class="mb-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" id="transcription"
+                                            name="transcription"
                                             onchange="localStorage.setItem('transcriptionChecked', this.checked);">
                                         <label class="form-check-label" for="transcription">
                                             Transcription
@@ -64,6 +66,7 @@
                                 <div class="mb-0">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" id="cudaCheck"
+                                            name="cudaCheck"
                                             onchange="localStorage.setItem('cudaChecked', this.checked);">
                                         <label class="form-check-label" for="cudaCheck">
                                             CUDA (default: CPU)
@@ -75,7 +78,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="UppyInput-Progress"></div>
+                <div class="UppyInput-Progress mt-2"></div>
             </div>
         </div>
     </div>
@@ -84,28 +87,13 @@
 </div>
 {% endblock %}
 
-
 {% block extrascripts %}
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
-        const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
-
-        if (transcriptionChecked !== null) {
-            document.getElementById('transcription').checked = transcriptionChecked;
-        }
-
-        if (cudaChecked !== null) {
-            document.getElementById('cudaCheck').checked = cudaChecked;
-        }
-    });
-
-</script>
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
     import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
+    const chooseFilesBtn = document.querySelector('.uppy-FileInput-btn');
+    chooseFilesBtn.disabled = true;
 
     const windowPath = window.location.href;
     const csrftoken = getCookie('csrftoken');
@@ -128,7 +116,7 @@
         .use(StatusBar, {
             target: '.UppyInput-Progress',
             hideUploadButton: true,
-            hideAfterFinish: false,
+            hideAfterFinish: true,
         });
     uppy.on('complete', (result) => {
         result.successful.forEach(index => {
@@ -140,6 +128,7 @@
     uppy.on('upload-error', (file, error, response) => {
         console.log(error);
     });
+
     // Create a function to handle WebSocket connections
     function handleWebSocketConnection(uploadURL) {
         // Create a WebSocket object and connect to the server
@@ -147,9 +136,13 @@
         // Listen for the 'open' event, which indicates that the WebSocket connection has been established
         socket.addEventListener('open', () => {
             console.log('WebSocket connection established.');
+            const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
+            const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
             // Send a message to the server with the file ID
             socket.send(JSON.stringify({
-                'file_id': /[^/]*$/.exec(uploadURL)[0]
+                'file_id': /[^/]*$/.exec(uploadURL)[0],
+                'transcription': transcriptionChecked,
+                'cuda': cudaChecked,
             }));
         });
         // Listen for the 'close' event, which indicates that the WebSocket connection has been closed
@@ -177,5 +170,20 @@
             output.insertBefore(sttData, output.firstChild);
         });
     }
+
+    // Configure the settings
+    document.addEventListener('DOMContentLoaded', () => {
+        const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
+        const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
+
+        if (transcriptionChecked !== null) {
+            document.getElementById('transcription').checked = transcriptionChecked;
+        }
+
+        if (cudaChecked !== null) {
+            document.getElementById('cudaCheck').checked = cudaChecked;
+        }
+    });
+
 </script>
 {% endblock extrascripts %}
