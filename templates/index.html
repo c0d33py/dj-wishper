@@ -151,6 +151,7 @@
         // Listen for the 'message' event, which indicates that a message has been received over the WebSocket connection
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
+            console.log(data)
             if (data.type == 'success') {
                 const output = document.getElementById('output');
                 // Prepend the data to the output element's <p> tag
