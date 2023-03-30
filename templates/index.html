@@ -4,30 +4,6 @@
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
 
-<style>
-    #configBtn {
-        background-color: #313131;
-        border: none;
-        color: white;
-        padding: 0.6rem 0.6rem;
-        text-align: center;
-        border-radius: 50%;
-    }
-
-    #configBtn:hover {
-        background-color: #474747;
-    }
-
-    .dropdown-menu.dropdown-menu {
-        background-color: #313131;
-        color: white;
-    }
-
-    .form-check-input:not(:checked) {
-        background-color: #575757;
-    }
-</style>
-
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
@@ -40,16 +16,7 @@
                     <div class="dropdown">
                         <button class="btn" id="configBtn" type="button" data-bs-toggle="dropdown" aria-expanded="false"
                             data-bs-auto-close="outside">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 7L11 7" stroke="white" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <circle opacity="0.3" cx="2" cy="2" r="2" transform="matrix(-1 0 0 1 7 5)"
-                                    stroke="white" stroke-width="1.5" />
-                                <path d="M3 17L13 17" stroke="white" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <circle opacity="0.3" cx="19" cy="17" r="2" stroke="white" stroke-width="1.5" />
-                            </svg>
+                            <i class="iconex iconex-filter"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" style="width: 240px;">
                             <form class="px-4 py-2" id="configForm" method="post">
@@ -158,15 +125,17 @@
                 const sttData = document.createElement('div');
                 sttData.classList.add('stt-data');
                 sttData.innerHTML = `
-                <p class="ur">${data.transcript}</p>
-                <button type="button" class="delete-transcript-btn" data-target="${data.id}">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.05063 8.73418C4.20573 7.60763 5.00954 6 6.41772 6H17.5823C18.9905 6 19.7943 7.60763 18.9494 8.73418V8.73418C18.3331 9.55584 18 10.5552 18 11.5823V18C18 20.2091 16.2091 22 14 22H10C7.79086 22 6 20.2091 6 18V11.5823C6 10.5552 5.66688 9.55584 5.05063 8.73418V8.73418Z" stroke="white" stroke-width="1.5"/>
-                        <path opacity="0.3" d="M14 17L14 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path opacity="0.3" d="M10 17L10 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path opacity="0.3" d="M16 6L15.4558 4.36754C15.1836 3.55086 14.4193 3 13.5585 3H10.4415C9.58066 3 8.81638 3.55086 8.54415 4.36754L8 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                </button>`;
+                <div class="stt-data">
+                    <p class="ur">${data.transcript}</p>
+                    <div class="stt-data__meta">
+                        <button type="button" class="copy-transcript-btn" data-target="${data.id}">
+                            <i class="iconex iconex-copy"></i>
+                        </button>
+                        <button type="button" class="delete-transcript-btn" date-target="${data.id}">
+                            <i class="iconex iconex-delete"></i>
+                        </button>
+                    </div>
+                </div>`;
                 output.insertBefore(sttData, output.firstChild);
             } else if (data.type == 'warning' || data.type == 'danger') {
                 console.log(data.alrt);
@@ -174,20 +143,5 @@
 
         });
     }
-
-    // Configure the settings
-    document.addEventListener('DOMContentLoaded', () => {
-        const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
-        const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
-
-        if (transcriptionChecked !== null) {
-            document.getElementById('transcription').checked = transcriptionChecked;
-        }
-
-        if (cudaChecked !== null) {
-            document.getElementById('cudaCheck').checked = cudaChecked;
-        }
-    });
-
 </script>
 {% endblock extrascripts %}

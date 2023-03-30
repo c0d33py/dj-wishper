@@ -31,34 +31,32 @@ export function stripQueryStringAndHashFromPath(URL) {
 // Get STT data
 async function getSTTData() {
     const transcribeData = await fetchAPI()
-    transcribeData.forEach((item) => {
+    transcribeData.forEach((data) => {
         outputWrapper.innerHTML += `
             <div class="stt-data">
-                <p class="ur">${item.transcript}</p>
-                <button type="button" class="delete-transcript-btn" date-target="${item.id}">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M5.05063 8.73418C4.20573 7.60763 5.00954 6 6.41772 6H17.5823C18.9905 6 19.7943 7.60763 18.9494 8.73418V8.73418C18.3331 9.55584 18 10.5552 18 11.5823V18C18 20.2091 16.2091 22 14 22H10C7.79086 22 6 20.2091 6 18V11.5823C6 10.5552 5.66688 9.55584 5.05063 8.73418V8.73418Z"
-                            stroke="white" stroke-width="1.5" />
-                        <path opacity="0.3" d="M14 17L14 11" stroke="white" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path opacity="0.3" d="M10 17L10 11" stroke="white" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path opacity="0.3"
-                            d="M16 6L15.4558 4.36754C15.1836 3.55086 14.4193 3 13.5585 3H10.4415C9.58066 3 8.81638 3.55086 8.54415 4.36754L8 6"
-                            stroke="white" stroke-width="1.5" stroke-linecap="round" />
-                    </svg>
-                </button>
+                <p class="ur">${data.transcript}</p>
+                <div class="stt-data__meta">
+                    <button type="button" class="copy-transcript-btn" data-target="${data.id}">
+                        <i class="iconex iconex-copy"></i>
+                    </button>
+                    <button type="button" class="delete-transcript-btn" date-target="${data.id}">
+                        <i class="iconex iconex-delete"></i>
+                    </button>
+                </div>
             </div>`;
     });
     languageCheck();
 };
 
+// On load
+getSTTData();
+
 // Delete transcript
 outputWrapper.addEventListener('click', async (event) => {
+    const deleteButton = event.target.closest('.delete-transcript-btn');
     // check if the clicked element is a delete button
-    if (event.target.classList.contains('delete-transcript-btn') || event.target.closest('.delete-transcript-btn')) {
-        const targetId = event.target.closest('.delete-transcript-btn').getAttribute('date-target');
+    if (deleteButton) {
+        const targetId = deleteButton.getAttribute('date-target');
         try {
             // send a DELETE request to the server to delete the object
             const response = await fetch(`/api/files/${targetId}/`, {
@@ -77,7 +75,28 @@ outputWrapper.addEventListener('click', async (event) => {
             console.error(error);
         }
     }
+    const copyButton = event.target.closest('.copy-transcript-btn');
+    if (copyButton) {
+        const textToCopy = copyButton.closest('.stt-data').querySelector('p').textContent;
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            console.log('Text copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    }
 });
 
-// On load
-getSTTData();
+// Configure the settings
+document.addEventListener('DOMContentLoaded', () => {
+    const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
+    const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
+
+    if (transcriptionChecked !== null) {
+        document.getElementById('transcription').checked = transcriptionChecked;
+    }
+
+    if (cudaChecked !== null) {
+        document.getElementById('cudaCheck').checked = cudaChecked;
+    }
+});

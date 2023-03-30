@@ -1,0 +1,22 @@
+/* Use svg file into class for reuse */
+.iconex {
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
+    vertical-align: middle;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+}
+
+.iconex.iconex-copy {
+    background-image: url(./ltt-copy.svg);
+}
+
+.iconex.iconex-delete {
+    background-image: url(./ltt-delete.svg);
+}
+
+.iconex.iconex-filter {
+    background-image: url(./ltt-filter.svg);
+}

@@ -1,4 +1,19 @@
-/* Base */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #303030;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #424242;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 .text-bg-dark {
     background-color: #1c1c1c !important;
     color: #ffffffe6 !important;
@@ -137,12 +152,12 @@
     position: relative;
 }
 
-.delete-transcript-btn {
+.stt-data__meta {
     display: none;
-    background-color: #731111;
-    padding: 10px;
-    border: 0;
-    border-radius: 50%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
     position: absolute;
     top: 50%;
     right: 0;
@@ -151,10 +166,26 @@
     transition: opacity 0.3s ease-in-out;
 }
 
-.stt-data:hover .delete-transcript-btn {
+.stt-data:hover .stt-data__meta {
     display: block;
     opacity: 1;
 }
+
+.copy-transcript-btn,
+.delete-transcript-btn {
+    padding: 5px;
+    border: 0;
+    border-radius: 50%;
+}
+
+.copy-transcript-btn {
+    background-color: #0b6841;
+}
+
+.delete-transcript-btn {
+    background-color: #731111;
+}
+
 
 .form-check-input {
     border: 0;
@@ -168,10 +199,28 @@
     box-shadow: none;
 }
 
-.form-check-input:not(:checked) {
-    background-color: #333333;
-}
-
 .form-check-input:not(:checked):focus {
     box-shadow: none;
+}
+
+.form-check-input:not(:checked) {
+    background-color: #575757;
+}
+
+#configBtn {
+    background-color: #313131;
+    border: none;
+    color: white;
+    padding: 0.6rem 0.6rem;
+    text-align: center;
+    border-radius: 50%;
+}
+
+#configBtn:hover {
+    background-color: #474747;
+}
+
+.dropdown-menu.dropdown-menu {
+    background-color: #313131;
+    color: white;
 }
