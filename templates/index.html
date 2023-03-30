@@ -7,6 +7,7 @@
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
+    <div class="loader"></div>
     <div class="file-upload">
         <div class="grid">
             <div class="column-full">
@@ -53,10 +54,83 @@
 {% endblock %}
 
 {% block extrascripts %}
+
+<script>
+    const element = document.querySelector('.loader');
+    let loadInterval
+
+    function loader(element) {
+        element.textContent = ''
+
+        loadInterval = setInterval(() => {
+            // Update the text content of the loading indicator
+            element.textContent += '.';
+
+            // If the loading indicator has reached three dots, reset it
+            if (element.textContent === '....') {
+                element.textContent = '';
+            }
+        }, 300);
+    }
+
+    function typeText(element, text) {
+        let index = 0
+
+        let interval = setInterval(() => {
+            if (index < text.length) {
+                element.innerHTML += text.charAt(index)
+                index++
+            } else {
+                clearInterval(interval)
+            }
+        }, 20)
+    }
+
+    function transcriptStripe(data) {
+        return (`
+       <div class="stt-data">
+            <p id="${data.id}">${data.transcript}</p>
+        </div>`
+        )
+    }
+
+    async function outputer() {
+        data = {
+            "id": "565",
+            "transcript": ""
+        }
+
+        const outputs = document.getElementById('#output');
+
+        output.innerHTML += transcriptStripe(data);
+
+        const sttData = document.getElementById(data.id);
+
+        loader(sttData)
+
+        // response fetch from data.json file
+        const response = await fetch('/static/data.json', {
+            'method': 'GET'
+        })
+
+        clearInterval(loadInterval)
+        sttData.innerHTML = " "
+
+        if (response.ok) {
+            const res = await response.json()
+            const parsedData = await res.transcript.trim() // trims any trailing spaces/'\n'
+            typeText(sttData, parsedData)
+
+        } else {
+            console.log('error')
+        }
+    }
+    outputer();
+</script>
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
-    import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
+    import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
 
     const windowPath = window.location.href;
     const csrftoken = getCookie('csrftoken');
@@ -142,5 +216,6 @@
             document.querySelector('.progress-transcript').style.display = 'none';
         });
     }
+
 </script>
 {% endblock extrascripts %}
