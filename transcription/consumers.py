@@ -39,9 +39,9 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
 
         if transcription:
             # Get cuda device if cuda is true and set the cuda device
-            device = 'cuda' if cuda else 'cpu'
-            model = WhisperModel(self.model_path, device=device, compute_type="int8")
-            await self.send(json.dumps({'alrt': f"Using {device} device", 'type': 'info'}))
+            DEVICE = 'cuda' if cuda else 'cpu'
+            model = WhisperModel(self.model_path, device=DEVICE, compute_type="int8")
+            await self.send(json.dumps({'alrt': f"Using {DEVICE} device", 'type': 'info'}))
 
             # Get the model dynamically
             TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
@@ -49,6 +49,11 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
 
             if tus_file is None:
                 return None
+            # Update the TusFileModel object to reference the MediaField object
+            MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
+            transcribe_instance = await sync_to_async(MediaField.objects.create)()
+            tus_file.content_object = transcribe_instance
+            await sync_to_async(tus_file.save)()
 
             # Convert the audio file to a mono WAV audio file
             audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
@@ -58,16 +63,14 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             for segment in segments:
                 await asyncio.sleep(0.1)  # Delay for dramatic effect
                 await self.send(json.dumps({
+                    'object': transcribe_instance.id,
                     'transcript': segment.text,
                     'alrt': 'Transcription complete',
                     'type': 'success'
                 }))
 
-            # Update the TusFileModel object to reference the MediaField object
-            # MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
-            # transcribe_instance = await sync_to_async(MediaField.objects.create)(transcript=paragraph)
-            # tus_file.content_object = transcribe_instance
-            # await sync_to_async(tus_file.save)()
+            transcribe_instance.transcript = segment.text
+            await sync_to_async(transcribe_instance.save)()
 
             # Delete the temporary audio file
             await sync_to_async(os.remove)(audio_data)
