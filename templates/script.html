@@ -1,0 +1,117 @@
+<script type="module">
+    import { getCookie } from "/static/js/cookie.js"
+    import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
+    import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
+    const transcriptWrapper = document.getElementById('output');
+
+    const windowPath = window.location.href;
+    const csrftoken = getCookie('csrftoken');
+
+    const data = {
+        "id": "1",
+        "transcript": "hello world this is a test transcript"
+    }
+
+    function typeText(text) {
+        return new Promise(resolve => {
+            let result = '';
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < text.length) {
+                    result += text.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    resolve(result);
+                }
+            }, 20);
+        });
+    }
+
+    async function transcriptStripe(data) {
+        const transcript = await typeText(data.transcript);
+        return `
+    <div class="stt-data">
+      <p class="ur">${transcript}</p>
+      <div class="stt-data__meta">
+        <button type="button" class="copy-transcript-btn" data-target="${data.id}">
+          <i class="iconex iconex-copy"></i>
+        </button>
+        <button type="button" class="delete-transcript-btn" data-target="${data.id}">
+          <i class="iconex iconex-delete"></i>
+        </button>
+      </div>
+    </div>`;
+    }
+
+    transcriptWrapper.innerHTML = await transcriptStripe(data);
+
+
+    const uppy = new Uppy({
+        debug: false,
+        autoProceed: true,
+        restrictions: {
+            allowedFileTypes: ['video/*', '.mkv', 'audio/*']
+        }
+    });
+    uppy
+        .use(FileInput, { target: '.UppyInput', pretty: true })
+        .use(Tus, {
+            endpoint: stripQueryStringAndHashFromPath(windowPath) + "api/upload/",
+            headers: { 'X-CSRFToken': csrftoken },
+            chunkSize: parseInt(5242880, 10),
+            retryDelays: [0, 1000, 3000, 5000],
+        })
+        .use(StatusBar, {
+            target: '.UppyInput-Progress',
+            hideUploadButton: true,
+            hideAfterFinish: true,
+        });
+    uppy.on('complete', (result) => {
+        result.successful.forEach(index => {
+            document.querySelector('.progress-transcript').style.display = 'inline-block';
+            const uploadURL = index.response.uploadURL;
+            handleWebSocketConnection(uploadURL);
+        });
+    });
+    uppy.on('upload-error', (file, error, response) => {
+        console.log(error);
+    });
+
+    // Create a function to handle WebSocket connections
+    function handleWebSocketConnection(uploadURL) {
+        // Create a WebSocket object and connect to the server
+        const transcriptWrapper = document.getElementById('output');
+        const socket = new WebSocket(`ws://${window.location.host}/transcript/`);
+        // Listen for the 'open' event, which indicates that the WebSocket connection has been established
+        socket.addEventListener('open', () => {
+            console.log('WebSocket connection established.');
+            const transcriptionChecked = JSON.parse(localStorage.getItem('transcriptionChecked'));
+            const cudaChecked = JSON.parse(localStorage.getItem('cudaChecked'));
+            // Send a message to the server with the file ID
+            socket.send(JSON.stringify({
+                'file_id': /[^/]*$/.exec(uploadURL)[0],
+                'transcription': transcriptionChecked,
+                'cuda': cudaChecked,
+            }));
+        });
+
+        // Listen for the 'message' event, which indicates that a message has been received over the WebSocket connection
+        socket.addEventListener('message', (event) => {
+            const data = JSON.parse(event.data);
+            console.log(data);
+            if (data.type == 'success') {
+                transcriptWrapper.innerHTML = transcriptStripe(data);
+            } else {
+                console.log(data.alrt);
+            };
+        });
+
+        // Listen for the 'close' event, which indicates that the WebSocket connection has been closed
+        socket.addEventListener('close', () => {
+            console.log('WebSocket disconnected');
+            document.querySelector('.progress-transcript').style.display = 'none';
+        });
+    }
+
+</script>
