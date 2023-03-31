@@ -7,6 +7,8 @@
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
+    <p id="ele"></p>
+    <div class="test"></div>
     <div class="loader"></div>
     <div class="file-upload">
         <div class="grid">
@@ -55,85 +57,54 @@
 
 {% block extrascripts %}
 
-<script>
-    const element = document.querySelector('.loader');
-    let loadInterval
-
-    function loader(element) {
-        element.textContent = ''
-
-        loadInterval = setInterval(() => {
-            // Update the text content of the loading indicator
-            element.textContent += '.';
-
-            // If the loading indicator has reached three dots, reset it
-            if (element.textContent === '....') {
-                element.textContent = '';
-            }
-        }, 300);
-    }
-
-    function typeText(element, text) {
-        let index = 0
-
-        let interval = setInterval(() => {
-            if (index < text.length) {
-                element.innerHTML += text.charAt(index)
-                index++
-            } else {
-                clearInterval(interval)
-            }
-        }, 20)
-    }
-
-    function transcriptStripe(data) {
-        return (`
-       <div class="stt-data">
-            <p id="${data.id}">${data.transcript}</p>
-        </div>`
-        )
-    }
-
-    async function outputer() {
-        data = {
-            "id": "565",
-            "transcript": ""
-        }
-
-        const outputs = document.getElementById('#output');
-
-        output.innerHTML += transcriptStripe(data);
-
-        const sttData = document.getElementById(data.id);
-
-        loader(sttData)
-
-        // response fetch from data.json file
-        const response = await fetch('/static/data.json', {
-            'method': 'GET'
-        })
-
-        clearInterval(loadInterval)
-        sttData.innerHTML = " "
-
-        if (response.ok) {
-            const res = await response.json()
-            const parsedData = await res.transcript.trim() // trims any trailing spaces/'\n'
-            typeText(sttData, parsedData)
-
-        } else {
-            console.log('error')
-        }
-    }
-    outputer();
-</script>
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
     import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
+    const transcriptWrapper = document.getElementById('output');
 
     const windowPath = window.location.href;
     const csrftoken = getCookie('csrftoken');
+
+    const data = {
+        "id": "1",
+        "transcript": "hello world this is a test transcript"
+    }
+
+    function typeText(text) {
+        return new Promise(resolve => {
+            let result = '';
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < text.length) {
+                    result += text.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    resolve(result);
+                }
+            }, 20);
+        });
+    }
+
+    async function transcriptStripe(data) {
+        const transcript = await typeText(data.transcript);
+        return `
+    <div class="stt-data">
+      <p class="ur">${transcript}</p>
+      <div class="stt-data__meta">
+        <button type="button" class="copy-transcript-btn" data-target="${data.id}">
+          <i class="iconex iconex-copy"></i>
+        </button>
+        <button type="button" class="delete-transcript-btn" data-target="${data.id}">
+          <i class="iconex iconex-delete"></i>
+        </button>
+      </div>
+    </div>`;
+    }
+
+    transcriptWrapper.innerHTML = await transcriptStripe(data);
+
 
     const uppy = new Uppy({
         debug: false,
@@ -169,6 +140,7 @@
     // Create a function to handle WebSocket connections
     function handleWebSocketConnection(uploadURL) {
         // Create a WebSocket object and connect to the server
+        const transcriptWrapper = document.getElementById('output');
         const socket = new WebSocket(`ws://${window.location.host}/ws/transcript/`);
         // Listen for the 'open' event, which indicates that the WebSocket connection has been established
         socket.addEventListener('open', () => {
@@ -188,24 +160,8 @@
             const data = JSON.parse(event.data);
             console.log(data);
             if (data.type == 'success') {
-                const output = document.getElementById('output');
-                // Prepend the data to the output element's <p> tag
-                const sttData = document.createElement('div');
-                sttData.classList.add('stt-data');
-                sttData.innerHTML = `
-                <div class="stt-data">
-                    <p class="ur">${data.transcript}</p>
-                    <div class="stt-data__meta">
-                        <button type="button" class="copy-transcript-btn" data-target="${data.id}">
-                            <i class="iconex iconex-copy"></i>
-                        </button>
-                        <button type="button" class="delete-transcript-btn" date-target="${data.id}">
-                            <i class="iconex iconex-delete"></i>
-                        </button>
-                    </div>
-                </div>`;
-                output.insertBefore(sttData, output.firstChild);
-            } else if (data.type == 'warning' || data.type == 'danger') {
+                transcriptWrapper.innerHTML = transcriptStripe(data);
+            } else {
                 console.log(data.alrt);
             };
         });

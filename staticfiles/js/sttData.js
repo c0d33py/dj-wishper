@@ -23,27 +23,64 @@ function languageCheck() {
     }
 };
 
+export let loadInterval
+
+export function loader(element) {
+    element.textContent = ''
+
+    loadInterval = setInterval(() => {
+        // Update the text content of the loading indicator
+        element.textContent += '.';
+
+        // If the loading indicator has reached three dots, reset it
+        if (element.textContent === '....') {
+            element.textContent = '';
+        }
+    }, 300);
+}
+
 // Strip query string and hash from path
 export function stripQueryStringAndHashFromPath(URL) {
     return URL.split("vnr")[0].split("#")[0];
 };
 
+// Type text animation
+export function typeText(text) {
+    const pTag = document.createElement('p');
+    let index = 0;
+    const interval = setInterval(() => {
+        if (index < text.length) {
+            pTag.textContent += text.charAt(index);
+            index++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 20);
+    return pTag;
+}
+
+// Transcript stripe template
+function transcriptStripe(data) {
+    return (`
+    <div class="stt-data">
+        <p class="ur">${data.transcript}</p>
+        <div class="stt-data__meta">
+            <button type="button" class="copy-transcript-btn" data-target="${data.id}">
+                <i class="iconex iconex-copy"></i>
+            </button>
+            <button type="button" class="delete-transcript-btn" date-target="${data.id}">
+                <i class="iconex iconex-delete"></i>
+            </button>
+        </div>
+    </div>
+    `)
+}
+
 // Get STT data
 async function getSTTData() {
     const transcribeData = await fetchAPI()
     transcribeData.forEach((data) => {
-        outputWrapper.innerHTML += `
-            <div class="stt-data">
-                <p class="ur">${data.transcript}</p>
-                <div class="stt-data__meta">
-                    <button type="button" class="copy-transcript-btn" data-target="${data.id}">
-                        <i class="iconex iconex-copy"></i>
-                    </button>
-                    <button type="button" class="delete-transcript-btn" date-target="${data.id}">
-                        <i class="iconex iconex-delete"></i>
-                    </button>
-                </div>
-            </div>`;
+        outputWrapper.insertAdjacentHTML('beforeend', transcriptStripe(data));
     });
     languageCheck();
 };
@@ -82,7 +119,7 @@ outputWrapper.addEventListener('click', async (event) => {
             await navigator.clipboard.writeText(textToCopy);
             console.log('Text copied to clipboard');
         } catch (err) {
-            console.error('Failed to copy text: ', err);
+            console.error('Failed to"></ copy text: ', err);
         }
     }
 });

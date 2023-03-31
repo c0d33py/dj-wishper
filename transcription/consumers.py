@@ -13,7 +13,6 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer, AsyncWebsocketConsumer
 from django.shortcuts import get_object_or_404
 from django.apps import apps
-from transformers import pipeline
 
 from faster_whisper import WhisperModel
 
@@ -26,7 +25,9 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
         self.model_path = "model/whisper-large-v2-ct2-int8_float16/"
         self.transcribe = Transcribe()
 
-    async def send_transcripts(self, text_data):
+    # async def send_transcripts(self, text_data):
+
+    async def receive(self, text_data):
         # Parse the JSON-encoded text_data into a Python dictionary
         try:
             data = json.loads(text_data)
@@ -50,69 +51,33 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             if tus_file is None:
                 return None
             # Update the TusFileModel object to reference the MediaField object
-            MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
-            transcribe_instance = await sync_to_async(MediaField.objects.create)()
-            tus_file.content_object = transcribe_instance
-            await sync_to_async(tus_file.save)()
+            # MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
+            # transcribe_instance = await sync_to_async(MediaField.objects.create)()
+            # tus_file.content_object = transcribe_instance
+            # await sync_to_async(tus_file.save)()
 
             # Convert the audio file to a mono WAV audio file
-            audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
-            segments, info = model.transcribe(audio_data, beam_size=5)
+            # audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
+            # segments, info = model.transcribe(audio_data, beam_size=5)
 
-            # Send the transcription to the client
-            for segment in segments:
-                await asyncio.sleep(0.1)  # Delay for dramatic effect
-                await self.send(json.dumps({
-                    'object': transcribe_instance.id,
-                    'transcript': segment.text,
-                    'alrt': 'Transcription complete',
-                    'type': 'success'
-                }))
+            # # # Send the transcription to the client
+            # response = ''
+            # for segment in segments:
+            #     response += segment.text + ' '
 
-            transcribe_instance.transcript = segment.text
-            await sync_to_async(transcribe_instance.save)()
+            await self.send(json.dumps({
+                'id': 45455,
+                'transcript': 'So I am far may contented to find it on to The word so they know Charlie said the general what sir just then asked the chubby',
+                'alrt': 'Transcription complete',
+                'type': 'success'
+            }))
+
+            # transcribe_instance.transcript = response
+            # await sync_to_async(transcribe_instance.save)()
 
             # Delete the temporary audio file
-            await sync_to_async(os.remove)(audio_data)
+            # await sync_to_async(os.remove)(audio_data)
             await self.close()
-
-    async def receive(self, text_data):
-        # If the client sends a "start" message, begin sending transcripts
-        asyncio.create_task(self.send_transcripts(text_data))
-
-    # async def receive(self, text_data):
-    #     # Parse the JSON-encoded text_data into a Python dictionary
-    #     try:
-    #         data = json.loads(text_data)
-    #         file_id = data['file_id']
-    #         transcription = data['transcription']
-    #         cuda = data['cuda']
-    #     except (KeyError, json.JSONDecodeError):
-    #         await self.send(json.dumps({'alrt': 'Invalid message received', 'type': 'danger'}))
-    #         return
-
-    #     if transcription:
-    #         # Get cuda device if cuda is true and set the cuda device
-    #         device = 'cuda' if cuda else 'cpu'
-    #         model = WhisperModel(self.model_path, device=device, compute_type="int8")
-    #         await self.send(json.dumps({'alrt': f"Using {device} device", 'type': 'info'}))
-
-    #         # Get the model dynamically
-    #         TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
-    #         tus_file = await sync_to_async(get_object_or_404)(TusFileModel, guid=file_id)
-
-    #         if tus_file is None:
-    #             return None
-
-    #         # Convert the audio file to a mono WAV audio file
-    #         audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
-    #         segments, info = model.transcribe(audio_data, beam_size=5)
-
-    #         # Send the transcription to the client
-    #         for segment in segments:
-    #             print(segment.text)
-    #             await self.send(json.dumps({
-    #                 'transcript': segment.text,
-    #                 'alrt': 'Transcription complete',
-    #                 'type': 'success'
-    #             }))
+        else:
+            await self.send(json.dumps({'alrt': 'Transcription cancelled', 'type': 'info'}))
+            await self.close()
