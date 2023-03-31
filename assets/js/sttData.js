@@ -60,7 +60,7 @@ export function typeText(text) {
 }
 
 // Transcript stripe template
-function transcriptStripe(data) {
+export function transcriptStripe(data) {
     return (`
     <div class="stt-data">
         <p class="ur">${data.transcript}</p>

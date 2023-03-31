@@ -5,16 +5,16 @@
     The consumer will be called by the websocket url in the urls.py file. The consumer will then
     call the transcribe_file method in the transcribe.py file to transcribe the audio file.
 '''
-import asyncio
 import os
+import asyncio
 import json
-import time
-from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncJsonWebsocketConsumer, AsyncWebsocketConsumer
-from django.shortcuts import get_object_or_404
-from django.apps import apps
 
+from asgiref.sync import sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
 from faster_whisper import WhisperModel
+
+from django.apps import apps
+from django.shortcuts import get_object_or_404
 
 
 class TranscriptConsumer(AsyncWebsocketConsumer):
@@ -22,10 +22,27 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
     def __init__(self):
         super().__init__()
         from .transcribe import Transcribe
-        self.model_path = "model/whisper-large-v2-ct2-int8_float16/"
+        self.model = "model/whisper-large-v2-ct2-int8_float16/"
         self.transcribe = Transcribe()
+        self.stream = None
+        self.tus_file = None
 
-    # async def send_transcripts(self, text_data):
+    async def connect(self):
+        # Accept the WebSocket connection
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Stop the WebSocket connection
+        await self.close()
+
+    async def receive_audio(self, file_id):
+        # Get the model dynamically & Convert the audio file to a mono WAV audio file
+        TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
+        # Get the TusFileModel object
+        self.tus_file = await sync_to_async(get_object_or_404)(TusFileModel, guid=file_id)
+        # Get the audio data
+        audio_data = await sync_to_async(self.transcribe.get_audio_file)(self.tus_file.uploaded_file.name)
+        return audio_data
 
     async def receive(self, text_data):
         # Parse the JSON-encoded text_data into a Python dictionary
@@ -36,48 +53,48 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             cuda = data['cuda']
         except (KeyError, json.JSONDecodeError):
             await self.send(json.dumps({'alrt': 'Invalid message received', 'type': 'danger'}))
-            return
 
         if transcription:
             # Get cuda device if cuda is true and set the cuda device
             DEVICE = 'cuda' if cuda else 'cpu'
-            model = WhisperModel(self.model_path, device=DEVICE, compute_type="int8")
-            await self.send(json.dumps({'alrt': f"Using {DEVICE} device", 'type': 'info'}))
+            await self.send(json.dumps({'device': DEVICE}))
+            # Create a Whisper model instance
+            self.stream = WhisperModel(self.model, device=DEVICE, compute_type="int8")
+            # Get audio data from message
+            audio_data = await self.receive_audio(file_id)
+            # # Process audio data with Whisper
+            segments, info = self.stream.transcribe(audio_data, beam_size=5)
+            # Process the transcription results
+            await self.process_transcription(segments)
+            # Delete the temporary audio file
+            await sync_to_async(os.remove)(audio_data)
 
-            # Get the model dynamically
-            TusFileModel = await sync_to_async(apps.get_model)('django_tus', 'TusFileModel')
-            tus_file = await sync_to_async(get_object_or_404)(TusFileModel, guid=file_id)
+    async def media_prepared(self):
+        # Get the model dynamically
+        MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
+        # Create a media instance
+        media_instance = await sync_to_async(MediaField.objects.create)()
+        # Associate the TusUpload object with the media instance
+        self.tus_file.content_object = media_instance
+        # Save the TusUpload object
+        await sync_to_async(self.tus_file.save)()
+        return media_instance
 
-            if tus_file is None:
-                return None
-            # Update the TusFileModel object to reference the MediaField object
-            # MediaField = await sync_to_async(apps.get_model)('transcription', 'MediaField')
-            # transcribe_instance = await sync_to_async(MediaField.objects.create)()
-            # tus_file.content_object = transcribe_instance
-            # await sync_to_async(tus_file.save)()
-
-            # Convert the audio file to a mono WAV audio file
-            # audio_data = await sync_to_async(self.transcribe.get_audio_file)(tus_file.uploaded_file.name)
-            # segments, info = model.transcribe(audio_data, beam_size=5)
-
-            # # # Send the transcription to the client
-            # response = ''
-            # for segment in segments:
-            #     response += segment.text + ' '
-
+    async def process_transcription(self, segments):
+        # Get the media instance
+        instance = await self.media_prepared()
+        # Send transcription results back to client
+        paragraph = ''
+        for segment in segments:
+            paragraph += segment.text + ' '
+            await asyncio.sleep(1)  # Sleep for 1 second
             await self.send(json.dumps({
-                'id': 45455,
-                'transcript': 'So I am far may contented to find it on to The word so they know Charlie said the general what sir just then asked the chubby',
+                'id': instance.id,
+                'text': segment.text,
                 'alrt': 'Transcription complete',
                 'type': 'success'
             }))
 
-            # transcribe_instance.transcript = response
-            # await sync_to_async(transcribe_instance.save)()
-
-            # Delete the temporary audio file
-            # await sync_to_async(os.remove)(audio_data)
-            await self.close()
-        else:
-            await self.send(json.dumps({'alrt': 'Transcription cancelled', 'type': 'info'}))
-            await self.close()
+        # Save the transcription instance
+        instance.transcript = paragraph
+        await sync_to_async(instance.save)()

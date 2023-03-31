@@ -1,51 +1,10 @@
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
-    import { stripQueryStringAndHashFromPath } from "/static/js/sttData.js"
-    const transcriptWrapper = document.getElementById('output');
+    import { stripQueryStringAndHashFromPath, transcriptStripe } from "/static/js/sttData.js"
 
     const windowPath = window.location.href;
     const csrftoken = getCookie('csrftoken');
-
-    const data = {
-        "id": "1",
-        "transcript": "hello world this is a test transcript"
-    }
-
-    function typeText(text) {
-        return new Promise(resolve => {
-            let result = '';
-            let index = 0;
-            const interval = setInterval(() => {
-                if (index < text.length) {
-                    result += text.charAt(index);
-                    index++;
-                } else {
-                    clearInterval(interval);
-                    resolve(result);
-                }
-            }, 20);
-        });
-    }
-
-    async function transcriptStripe(data) {
-        const transcript = await typeText(data.transcript);
-        return `
-    <div class="stt-data">
-      <p class="ur">${transcript}</p>
-      <div class="stt-data__meta">
-        <button type="button" class="copy-transcript-btn" data-target="${data.id}">
-          <i class="iconex iconex-copy"></i>
-        </button>
-        <button type="button" class="delete-transcript-btn" data-target="${data.id}">
-          <i class="iconex iconex-delete"></i>
-        </button>
-      </div>
-    </div>`;
-    }
-
-    transcriptWrapper.innerHTML = await transcriptStripe(data);
-
 
     const uppy = new Uppy({
         debug: false,
@@ -100,11 +59,11 @@
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
-            if (data.type == 'success') {
-                transcriptWrapper.innerHTML = transcriptStripe(data);
-            } else {
-                console.log(data.alrt);
-            };
+            // if (data.type == 'success') {
+            //     // transcriptWrapper.innerHTML = transcriptStripe(data);
+            // } else {
+            //     console.log(data);
+            // };
         });
 
         // Listen for the 'close' event, which indicates that the WebSocket connection has been closed
@@ -113,5 +72,4 @@
             document.querySelector('.progress-transcript').style.display = 'none';
         });
     }
-
 </script>

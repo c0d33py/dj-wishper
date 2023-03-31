@@ -1,6 +1,0 @@
-@font-face {
-    font-family: 'Noto';
-    src: url("../noto-nastaliq/NotoNastaliqUrdu-Bold.ttf") format("truetype");
-    src: url("../noto-nastaliq/NotoNastaliqUrdu-Regular.ttf") format("truetype");
-    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
-}

@@ -3,13 +3,24 @@
 {% block body %}
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
+<style>
+    .transcript-input {
+        background-color: #1c1c1c00;
+        border: 1px solid #333;
+    }
+
+    .transcript-input:focus {
+        background-color: #1c1c1c00;
+        border: 1px solid #333;
+        color: #fffffff6;
+        box-shadow: none;
+    }
+</style>
 
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
-    <p id="ele"></p>
-    <div class="test"></div>
-    <div class="loader"></div>
+
     <div class="file-upload">
         <div class="grid">
             <div class="column-full">
@@ -56,16 +67,22 @@
 {% endblock %}
 
 {% block extrascripts %}
-<script>
+{% include 'script.html' %}
+<!-- <script>
     let baseurl = 'ws://' + window.location.host + '/transcript/';
+    let textData = "";
 
     const socket = new WebSocket(baseurl);
     socket.onopen = function (e) {
         console.log("Connection established!");
+        socket.send("Hello Server!");
     };
 
     socket.onmessage = function (event) {
-        console.log(event.data);
+        const data = JSON.parse(event.data);
+        console.log(data.transcription);
+        textData += data.transcript + " ";
+        document.getElementById("ele").innerHTML = textData;
     };
 
     socket.onclose = function (event) {
@@ -81,5 +98,5 @@
         console.log("Error " + error.message);
     };
 
-</script>
+</script> -->
 {% endblock extrascripts %}
