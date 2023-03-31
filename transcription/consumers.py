@@ -1,10 +1,3 @@
-'''
-    This is the consumer that will be used to handle the websocket connection to the client and the
-    transcription of the audio file.
-
-    The consumer will be called by the websocket url in the urls.py file. The consumer will then
-    call the transcribe_file method in the transcribe.py file to transcribe the audio file.
-'''
 import os
 import asyncio
 import json
@@ -18,6 +11,35 @@ from django.shortcuts import get_object_or_404
 
 
 class TranscriptConsumer(AsyncWebsocketConsumer):
+    """
+    This is a consumer that will be used to handle the WebSocket connection to the client and the transcription of the
+    audio file.
+
+    Attributes:
+        model (str): The path to the model directory.
+        transcribe (Transcribe): The `Transcribe` instance.
+        stream (WhisperModel): The `WhisperModel` instance.
+        tus_file (TusFileModel): The `TusFileModel` instance.
+
+    Methods:
+        connect(self)
+            Accepts the WebSocket connection.
+
+        disconnect(self, close_code)
+            Stops the WebSocket connection.
+
+        receive_audio(self, file_id)
+            Gets the `TusFileModel` object and retrieves the audio data.
+
+        receive(self, text_data)
+            Receives the WebSocket message and processes the transcription.
+
+        media_prepared(self)
+            Creates a `MediaField` instance and associates it with the `TusFileModel` object.
+
+        process_transcription(self, segments)
+            Processes the transcription results and sends them back to the client.
+    """
 
     def __init__(self):
         super().__init__()
@@ -68,6 +90,8 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             await self.process_transcription(segments)
             # Delete the temporary audio file
             await sync_to_async(os.remove)(audio_data)
+            # Close the WebSocket connection
+            await self.disconnect(1000)
 
     async def media_prepared(self):
         # Get the model dynamically
@@ -94,7 +118,6 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
                 'alrt': 'Transcription complete',
                 'type': 'success'
             }))
-
         # Save the transcription instance
         instance.transcript = paragraph
         await sync_to_async(instance.save)()

@@ -12,7 +12,7 @@ The path object takes two arguments:
 
 from django.urls import path
 
-from transcription.consumers2 import TranscriptConsumer
+from transcription.consumers import TranscriptConsumer
 
 wesocket_routing = [
     path('transcript/', TranscriptConsumer.as_asgi()),
