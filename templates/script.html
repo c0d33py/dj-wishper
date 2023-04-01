@@ -1,7 +1,7 @@
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
-    import { stripQueryStringAndHashFromPath, transcriptStripe } from "/static/js/sttData.js"
+    import { stripQueryStringAndHashFromPath, transcriptStripe, languageCheck } from "/static/js/sttData.js"
 
 
     const windowPath = window.location.href;
@@ -38,25 +38,6 @@
         console.log(error);
     });
 
-    function transcriptStripe(data) {
-        textData += data.transcript + " ";
-        return (`
-            <div class="stt-data" data-target="${data.id}">
-                <p class="ur">${textData}</p>
-                <div class="stt-data__meta">
-                    <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                        <button type="button" class="btn btn-default edit-transcript-btn" data-target="${data.id}">
-                            <i class="iconex iconex-broken-pen1"></i></button>
-                        <button type="button" class="btn btn-default copy-transcript-btn">
-                            <i class="iconex iconex-broken-copy"></i></button>
-                        <button type="button" class="btn btn-default delete-transcript-btn" date-target="${data.id}">
-                            <i class="iconex iconex-broken-delete"></i></button>
-                    </div>
-                </div>
-            </div>
-    `)
-    }
-
     // Create a function to handle WebSocket connections
     function handleWebSocketConnection(uploadURL) {
         // Create a WebSocket object and connect to the server
@@ -81,8 +62,17 @@
         // Listen for the 'message'
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
+            const sttParagraph = document.querySelector(`.stt-data[data-target="${data.id}"] p`);
             if (data.transcript) {
-                document.getElementById("output").innerHTML = transcriptStripe(data);
+                if (sttParagraph) {
+                    sttParagraph.textContent += data.transcript + " ";
+                    languageCheck();
+                } else {
+                    console.log('inserting')
+                    transcriptWrapper.insertAdjacentHTML('afterbegin', transcriptStripe(data));
+                }
+            } else if (data.error) {
+                console.log(data.error);
             }
         };
 

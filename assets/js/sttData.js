@@ -12,77 +12,46 @@ async function fetchAPI() {
     return data.results;
 };
 
+// Strip query string and hash from path
+export function stripQueryStringAndHashFromPath(URL) {
+    return URL.split("vnr")[0].split("#")[0];
+};
+
 // Language check
-function languageCheck() {
+export function languageCheck() {
     const paragraphs = document.querySelectorAll('.stt-data p');
     for (let i = 0; i < paragraphs.length; i++) {
-        // Check if the text is in English
-        const text = paragraphs[i].innerText;
-        if (/^[a-zA-Z\s]+$/.test(text)) {
-
+        // Check if the text is in English remove the class 'ur' [a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/\s]
+        const text = paragraphs[i].textContent;
+        if (/^[a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/]+/.test(text)) {
             paragraphs[i].classList.remove('ur');
         }
         // Check the lines of text length
         const rect = paragraphs[i].getClientRects()[0];
         const lineHeight = parseInt(window.getComputedStyle(paragraphs[i]).lineHeight);
         const numLines = rect.height / lineHeight;
-
         // Get the next sibling element of the paragraph and remove the class
         if (numLines < 4) {
             let nextSibling = paragraphs[i].nextElementSibling;
             nextSibling.style.transform = "translate(102%, -50%)";
-            nextSibling.querySelector('.btn-group-vertical').className = 'btn-group';
+            const btnGroup = nextSibling.querySelector('.btn-group-vertical');
+            btnGroup?.classList.replace('btn-group-vertical', 'btn-group');
         }
     }
 };
 
-export let loadInterval
-
-export function loader(element) {
-    element.textContent = ''
-
-    loadInterval = setInterval(() => {
-        // Update the text content of the loading indicator
-        element.textContent += '.';
-
-        // If the loading indicator has reached three dots, reset it
-        if (element.textContent === '....') {
-            element.textContent = '';
-        }
-    }, 300);
-}
-
-// Strip query string and hash from path
-export function stripQueryStringAndHashFromPath(URL) {
-    return URL.split("vnr")[0].split("#")[0];
-};
-
-// Type text animation
-export function typeText(text) {
-    const pTag = document.createElement('p');
-    let index = 0;
-    const interval = setInterval(() => {
-        if (index < text.length) {
-            pTag.textContent += text.charAt(index);
-            index++;
-        } else {
-            clearInterval(interval);
-        }
-    }, 20);
-    return pTag;
-}
-
+// Create transcript stripe
 export function transcriptStripe(data) {
     return (`
-    <div class="stt-data">
+    <div class="stt-data" data-target="${data.id}">
         <p class="ur">${data.transcript}</p>
         <div class="stt-data__meta">
             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                <button type="button" class="btn btn-default edit-transcript-btn" data-target="${data.id}">
+                <button type="button" class="btn btn-default edit-transcript-btn">
                     <i class="iconex iconex-broken-pen1"></i></button>
                 <button type="button" class="btn btn-default copy-transcript-btn">
                     <i class="iconex iconex-broken-copy"></i></button>
-                <button type="button" class="btn btn-default delete-transcript-btn" date-target="${data.id}">
+                <button type="button" class="btn btn-default delete-transcript-btn">
                     <i class="iconex iconex-broken-delete"></i></button>
             </div>
         </div>
@@ -118,14 +87,14 @@ outputWrapper.addEventListener('click', async (event) => {
         }
     }
     if (editButton) {
-        const targetId = editButton.dataset.target;
+        const targetId = editButton.closest('.stt-data').dataset.target;
         let paragraph = editButton.closest('.stt-data').querySelector('p');
-        paragraph.setAttribute('contenteditable', 'true');
+        paragraph.contentEditable = true;
         paragraph.classList.add('editing');
         // listen to the mousedown event on the document
-        document.addEventListener('mousedown', (event) => {
-            if (!paragraph.contains(event.target)) {
-                paragraph.removeAttribute('contenteditable');
+        document.addEventListener('mousedown', ({ target }) => {
+            if (!paragraph.contains(target)) {
+                paragraph.contentEditable = false;
                 paragraph.classList.remove('editing');
             }
         });
@@ -147,7 +116,7 @@ outputWrapper.addEventListener('click', async (event) => {
         });
     }
     if (deleteButton) {
-        const targetId = deleteButton.getAttribute('date-target');
+        const targetId = deleteButton.closest('.stt-data').dataset.target;;
         try {
             // send a DELETE request to the server to delete the object
             const response = await fetch(`/api/files/${targetId}/`, {
