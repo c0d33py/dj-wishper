@@ -21,10 +21,11 @@ export function stripQueryStringAndHashFromPath(URL) {
 export function languageCheck() {
     const paragraphs = document.querySelectorAll('.stt-data p');
     for (let i = 0; i < paragraphs.length; i++) {
-        // Check if the text is in English remove the class 'ur' [a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/\s]
+        // Check if the text is in English add the class 'en' [a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/\s]
         const text = paragraphs[i].textContent;
         if (/^[a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/]+/.test(text)) {
             paragraphs[i].classList.remove('ur');
+            paragraphs[i].classList.add('eng');
         }
         // Check the lines of text length
         const rect = paragraphs[i].getClientRects()[0];
@@ -37,8 +38,25 @@ export function languageCheck() {
             const btnGroup = nextSibling.querySelector('.btn-group-vertical');
             btnGroup?.classList.replace('btn-group-vertical', 'btn-group');
         }
+        if (numLines > 4) {
+            paragraphs[i].classList.add('read-more');
+        }
     }
 };
+
+// Add read more class to the paragraphs
+function addReadMoreClass() {
+    const paragraphs = document.querySelectorAll('.stt-data p');
+    for (let i = 0; i < paragraphs.length; i++) {
+        // Check the lines of text length
+        const rect = paragraphs[i].getClientRects()[0];
+        const lineHeight = parseInt(window.getComputedStyle(paragraphs[i]).lineHeight);
+        const numLines = rect.height / lineHeight;
+        if (numLines > 6) {
+            paragraphs[i].classList.add('read-more');
+        }
+    }
+}
 
 // Create transcript stripe
 export function transcriptStripe(data) {
@@ -66,6 +84,7 @@ async function getSTTData() {
         outputWrapper.insertAdjacentHTML('beforeend', transcriptStripe(data));
     });
     languageCheck();
+    addReadMoreClass();
 };
 
 // On load
@@ -76,6 +95,10 @@ outputWrapper.addEventListener('click', async (event) => {
     const deleteButton = event.target.closest('.delete-transcript-btn');
     const copyButton = event.target.closest('.copy-transcript-btn');
     const editButton = event.target.closest('.edit-transcript-btn');
+    const readMoreButton = event.target.closest('p.read-more');
+    if (readMoreButton) {
+        readMoreButton.classList.remove('read-more');
+    }
     // Action on click of the buttons
     if (copyButton) {
         const textToCopy = copyButton.closest('.stt-data').querySelector('p').textContent;

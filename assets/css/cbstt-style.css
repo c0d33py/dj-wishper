@@ -144,13 +144,40 @@ button:hover .iconex.iconex-broken-delete {
 }
 
 /* Home page */
-.ur {
+p.ur {
     font-family: Nafees Nastaleeq;
     direction: rtl;
     font-style: normal;
     font-weight: normal;
     line-height: 2.2;
     font-size: 18px;
+}
+
+p.eng.read-more {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    padding: 6px 10px !important;
+}
+
+p.ur.read-more {
+    overflow: hidden;
+    display: block;
+    max-height: 15.7rem;
+    -webkit-line-clamp: 6;
+    display: box;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+p.editing:focus,
+p.editing {
+    border: 1px solid #3b956f !important;
+    outline: none;
 }
 
 .listening {

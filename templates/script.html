@@ -68,7 +68,6 @@
                     sttParagraph.textContent += data.transcript + " ";
                     languageCheck();
                 } else {
-                    console.log('inserting')
                     transcriptWrapper.insertAdjacentHTML('afterbegin', transcriptStripe(data));
                 }
             } else if (data.error) {

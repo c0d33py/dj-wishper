@@ -4,14 +4,6 @@
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
 
-<style>
-    p.editing:focus,
-    p.editing {
-        border: 1px solid #3b956f !important;
-        outline: none;
-    }
-</style>
-
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
