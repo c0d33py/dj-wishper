@@ -20,3 +20,21 @@
 .iconex.iconex-filter {
     background-image: url(./ltt-filter.svg);
 }
+
+/* Tiny Broken */
+
+.iconex.iconex-broken-copy {
+    background-image: url(./broken_copy.svg);
+}
+
+.iconex.iconex-broken-delete {
+    background-image: url(./broken_delete.svg);
+}
+
+.iconex.iconex-broken-pen1 {
+    background-image: url(./broken_pen1.svg);
+}
+
+.iconex.iconex-broken-send {
+    background-image: url(./broken_send.svg);
+}

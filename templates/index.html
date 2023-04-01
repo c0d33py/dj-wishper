@@ -3,17 +3,12 @@
 {% block body %}
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
-<style>
-    .transcript-input {
-        background-color: #1c1c1c00;
-        border: 1px solid #333;
-    }
 
-    .transcript-input:focus {
-        background-color: #1c1c1c00;
-        border: 1px solid #333;
-        color: #fffffff6;
-        box-shadow: none;
+<style>
+    p.editing:focus,
+    p.editing {
+        border: 1px solid #3b956f !important;
+        outline: none;
     }
 </style>
 
@@ -61,42 +56,12 @@
             </div>
         </div>
     </div>
-
     <div id="output" class="mt-4"></div>
 </div>
 {% endblock %}
 
 {% block extrascripts %}
+
 {% include 'script.html' %}
-<!-- <script>
-    let baseurl = 'ws://' + window.location.host + '/transcript/';
-    let textData = "";
 
-    const socket = new WebSocket(baseurl);
-    socket.onopen = function (e) {
-        console.log("Connection established!");
-        socket.send("Hello Server!");
-    };
-
-    socket.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        console.log(data.transcription);
-        textData += data.transcript + " ";
-        document.getElementById("ele").innerHTML = textData;
-    };
-
-    socket.onclose = function (event) {
-        if (event.wasClean) {
-            console.log('Connection closed cleanly');
-        } else {
-            console.log('Connection died');
-        }
-        console.log('Code: ' + event.code + ' reason: ' + event.reason);
-    };
-
-    socket.onerror = function (error) {
-        console.log("Error " + error.message);
-    };
-
-</script> -->
 {% endblock extrascripts %}

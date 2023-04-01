@@ -115,6 +115,34 @@
     color: #fff;
 }
 
+.btn-default {
+    background-color: transparent;
+    border: 1px solid #333;
+    color: #fffffff6;
+}
+
+.btn-default:focus,
+.btn-default:hover {
+    border: 1px solid #333 !important;
+}
+
+.iconex.iconex-broken-send,
+.iconex.iconex-broken-pen1,
+.iconex.iconex-broken-copy,
+.iconex.iconex-broken-delete {
+    filter: invert(30%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+button:hover .iconex.iconex-broken-send,
+button:hover .iconex.iconex-broken-pen1,
+button:hover .iconex.iconex-broken-copy {
+    filter: invert(5%);
+}
+
+button:hover .iconex.iconex-broken-delete {
+    filter: invert(60%) sepia(90%) saturate(5630%) hue-rotate(352deg) brightness(89%) contrast(89%);
+}
+
 /* Home page */
 .ur {
     font-family: Nafees Nastaleeq;
@@ -161,7 +189,8 @@
     position: absolute;
     top: 50%;
     right: 0;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
+    transform: translate(108%, -50%);
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
 }
@@ -170,22 +199,6 @@
     display: block;
     opacity: 1;
 }
-
-.copy-transcript-btn,
-.delete-transcript-btn {
-    padding: 5px;
-    border: 0;
-    border-radius: 50%;
-}
-
-.copy-transcript-btn {
-    background-color: #0b6841;
-}
-
-.delete-transcript-btn {
-    background-color: #731111;
-}
-
 
 .form-check-input {
     border: 0;

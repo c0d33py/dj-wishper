@@ -81,15 +81,16 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             DEVICE = 'cuda' if cuda else 'cpu'
             await self.send(json.dumps({'device': DEVICE}))
             # Create a Whisper model instance
-            self.stream = WhisperModel(self.model, device=DEVICE, compute_type="int8")
+            # self.stream = WhisperModel(self.model, device=DEVICE, compute_type="int8")
             # Get audio data from message
-            audio_data = await self.receive_audio(file_id)
+            # audio_data = await self.receive_audio(file_id)
             # # Process audio data with Whisper
-            segments, info = self.stream.transcribe(audio_data, beam_size=5)
+            # segments, info = self.stream.transcribe(audio_data, beam_size=5)
             # Process the transcription results
-            await self.process_transcription(segments)
+            # await self.process_transcription(segments)
+            await self.test_func()
             # Delete the temporary audio file
-            await sync_to_async(os.remove)(audio_data)
+            # await sync_to_async(os.remove)(audio_data)
             # Close the WebSocket connection
             await self.disconnect(1000)
 
@@ -121,3 +122,21 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
         # Save the transcription instance
         instance.transcript = paragraph
         await sync_to_async(instance.save)()
+
+    async def test_func(self):
+        try:
+            text = "So I am far may contented to find it on to The word so they know Charlie said the general what sir just then asked the chubby"
+
+            words = text.split()
+
+            for i in range(0, len(words), 4):
+                group = " ".join(words[i:i + 4])
+                await asyncio.sleep(1)  # Sleep for 1 second
+                await self.send(json.dumps({
+                    'id': 45455,
+                    'transcript': group,
+                    'alrt': 'Transcription complete',
+                    'type': 'success'
+                }))
+        except Exception as e:
+            print(e)

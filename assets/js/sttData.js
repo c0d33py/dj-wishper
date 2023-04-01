@@ -16,9 +16,22 @@ async function fetchAPI() {
 function languageCheck() {
     const paragraphs = document.querySelectorAll('.stt-data p');
     for (let i = 0; i < paragraphs.length; i++) {
+        // Check if the text is in English
         const text = paragraphs[i].innerText;
         if (/^[a-zA-Z\s]+$/.test(text)) {
+
             paragraphs[i].classList.remove('ur');
+        }
+        // Check the lines of text length
+        const rect = paragraphs[i].getClientRects()[0];
+        const lineHeight = parseInt(window.getComputedStyle(paragraphs[i]).lineHeight);
+        const numLines = rect.height / lineHeight;
+
+        // Get the next sibling element of the paragraph and remove the class
+        if (numLines < 4) {
+            let nextSibling = paragraphs[i].nextElementSibling;
+            nextSibling.style.transform = "translate(102%, -50%)";
+            nextSibling.querySelector('.btn-group-vertical').className = 'btn-group';
         }
     }
 };
@@ -59,18 +72,19 @@ export function typeText(text) {
     return pTag;
 }
 
-// Transcript stripe template
 export function transcriptStripe(data) {
     return (`
     <div class="stt-data">
         <p class="ur">${data.transcript}</p>
         <div class="stt-data__meta">
-            <button type="button" class="copy-transcript-btn" data-target="${data.id}">
-                <i class="iconex iconex-copy"></i>
-            </button>
-            <button type="button" class="delete-transcript-btn" date-target="${data.id}">
-                <i class="iconex iconex-delete"></i>
-            </button>
+            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                <button type="button" class="btn btn-default edit-transcript-btn" data-target="${data.id}">
+                    <i class="iconex iconex-broken-pen1"></i></button>
+                <button type="button" class="btn btn-default copy-transcript-btn">
+                    <i class="iconex iconex-broken-copy"></i></button>
+                <button type="button" class="btn btn-default delete-transcript-btn" date-target="${data.id}">
+                    <i class="iconex iconex-broken-delete"></i></button>
+            </div>
         </div>
     </div>
     `)
@@ -91,7 +105,47 @@ getSTTData();
 // Delete transcript
 outputWrapper.addEventListener('click', async (event) => {
     const deleteButton = event.target.closest('.delete-transcript-btn');
-    // check if the clicked element is a delete button
+    const copyButton = event.target.closest('.copy-transcript-btn');
+    const editButton = event.target.closest('.edit-transcript-btn');
+    // Action on click of the buttons
+    if (copyButton) {
+        const textToCopy = copyButton.closest('.stt-data').querySelector('p').textContent;
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            console.log('Text copied to clipboard');
+        } catch (err) {
+            console.error('Failed to"></ copy text: ', err);
+        }
+    }
+    if (editButton) {
+        const targetId = editButton.dataset.target;
+        let paragraph = editButton.closest('.stt-data').querySelector('p');
+        paragraph.setAttribute('contenteditable', 'true');
+        paragraph.classList.add('editing');
+        // listen to the mousedown event on the document
+        document.addEventListener('mousedown', (event) => {
+            if (!paragraph.contains(event.target)) {
+                paragraph.removeAttribute('contenteditable');
+                paragraph.classList.remove('editing');
+            }
+        });
+        paragraph.addEventListener('input', async (e) => {
+            // send a PUT request to the server to delete the object on keyup
+            const response = await fetch(`/api/files/${targetId}/`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    transcript: e.target.textContent,
+                }),
+            });
+            if (response.ok) {
+                console.log('Transcript updated');
+            }
+        });
+    }
     if (deleteButton) {
         const targetId = deleteButton.getAttribute('date-target');
         try {
@@ -110,16 +164,6 @@ outputWrapper.addEventListener('click', async (event) => {
             }
         } catch (error) {
             console.error(error);
-        }
-    }
-    const copyButton = event.target.closest('.copy-transcript-btn');
-    if (copyButton) {
-        const textToCopy = copyButton.closest('.stt-data').querySelector('p').textContent;
-        try {
-            await navigator.clipboard.writeText(textToCopy);
-            console.log('Text copied to clipboard');
-        } catch (err) {
-            console.error('Failed to"></ copy text: ', err);
         }
     }
 });
