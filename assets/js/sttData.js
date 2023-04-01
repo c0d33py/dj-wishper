@@ -38,9 +38,6 @@ export function languageCheck() {
             const btnGroup = nextSibling.querySelector('.btn-group-vertical');
             btnGroup?.classList.replace('btn-group-vertical', 'btn-group');
         }
-        if (numLines > 4) {
-            paragraphs[i].classList.add('read-more');
-        }
     }
 };
 
