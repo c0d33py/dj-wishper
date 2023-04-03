@@ -33,3 +33,15 @@
 ***To install cudnn, we need to download the deb file from NVIDIA website. avoide the libnvidia-cfg1_450.51.06-0ubuntu0.18.04.1_amd64.deb file, it will cause the system crash***
 
     apt install nvidia-cudnn
+
+margin: 0 0 4px 0;
+    line-height: 40px;
+    overflow: hidden;
+    display: block;
+    max-height: 9rem;
+    -webkit-line-clamp: 3;
+    display: box;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
