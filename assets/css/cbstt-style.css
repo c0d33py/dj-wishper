@@ -143,30 +143,38 @@ button:hover .iconex.iconex-broken-delete {
     filter: invert(60%) sepia(90%) saturate(5630%) hue-rotate(352deg) brightness(89%) contrast(89%);
 }
 
-/* Home page */
-p.ur {
+/* Transcript Paragraph style */
+.transcript-wrapper p {
+    padding: 4px 10px;
+    border: 1px solid #aaaaaa60;
+    border-radius: 10px;
+}
+
+.transcript-wrapper p.en.read-more {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    padding: 4px 10px !important;
+}
+
+.transcript-wrapper p.ur {
     font-family: Nafees Nastaleeq;
     direction: rtl;
     font-style: normal;
     font-weight: normal;
-    line-height: 2.2;
-    font-size: 18px;
-}
-
-p.eng.read-more {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 8;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
+    line-height: 2;
+    font-size: 17px;
     padding: 6px 10px !important;
+
 }
 
-p.ur.read-more {
+.transcript-wrapper p.ur.read-more {
     overflow: hidden;
     display: block;
-    max-height: 15.7rem;
-    -webkit-line-clamp: 6;
+    max-height: 9rem;
+    -webkit-line-clamp: 4;
     display: box;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -184,12 +192,6 @@ p.editing {
     background-color: brown;
     border: 1px solid brown;
     color: #fff;
-}
-
-#output p {
-    padding: 10px;
-    border: 1px solid #aaaaaa60;
-    border-radius: 10px;
 }
 
 .navbar .dropdown-menu {
@@ -212,7 +214,7 @@ p.editing {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
     position: absolute;
     top: 50%;
     right: 0;

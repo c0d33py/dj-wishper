@@ -7,7 +7,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MediaField
-        fields = ('id', 'transcript')
+        fields = '__all__'
 
     def create(self, validated_data):
         return MediaField.objects.create(**validated_data)

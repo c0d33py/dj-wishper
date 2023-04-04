@@ -17,30 +17,6 @@ export function stripQueryStringAndHashFromPath(URL) {
     return URL.split("vnr")[0].split("#")[0];
 };
 
-// Language check
-export function languageCheck() {
-    const paragraphs = document.querySelectorAll('.stt-data p');
-    for (let i = 0; i < paragraphs.length; i++) {
-        // Check if the text is in English add the class 'en' [a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/\s]
-        const text = paragraphs[i].textContent;
-        if (/^[a-zA-Z!@#$%^&*(),.?":{}|<>;'\[\]\\\/]+/.test(text)) {
-            paragraphs[i].classList.remove('ur');
-            paragraphs[i].classList.add('eng');
-        }
-        // Check the lines of text length
-        const rect = paragraphs[i].getClientRects()[0];
-        const lineHeight = parseInt(window.getComputedStyle(paragraphs[i]).lineHeight);
-        const numLines = rect.height / lineHeight;
-        // Get the next sibling element of the paragraph and remove the class
-        if (numLines < 4) {
-            let nextSibling = paragraphs[i].nextElementSibling;
-            nextSibling.style.transform = "translate(102%, -50%)";
-            const btnGroup = nextSibling.querySelector('.btn-group-vertical');
-            btnGroup?.classList.replace('btn-group-vertical', 'btn-group');
-        }
-    }
-};
-
 // Add read more class to the paragraphs
 function addReadMoreClass() {
     const paragraphs = document.querySelectorAll('.stt-data p');
@@ -51,6 +27,11 @@ function addReadMoreClass() {
         const numLines = rect.height / lineHeight;
         if (numLines > 6) {
             paragraphs[i].classList.add('read-more');
+        } else {
+            let nextSibling = paragraphs[i].nextElementSibling;
+            nextSibling.style.transform = "translate(102%, -50%)";
+            const btnGroup = nextSibling.querySelector('.btn-group-vertical');
+            btnGroup?.classList.replace('btn-group-vertical', 'btn-group');
         }
     }
 }
@@ -59,7 +40,8 @@ function addReadMoreClass() {
 export function transcriptStripe(data) {
     return (`
     <div class="stt-data" data-target="${data.id}">
-        <p class="ur">${data.transcript}</p>
+        <p class="${data.language}" data-language_probability="${data.language_probability}">
+            ${data.transcript}</p>
         <div class="stt-data__meta">
             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
                 <button type="button" class="btn btn-default edit-transcript-btn">
@@ -80,7 +62,6 @@ async function getSTTData() {
     transcribeData.forEach((data) => {
         outputWrapper.insertAdjacentHTML('beforeend', transcriptStripe(data));
     });
-    languageCheck();
     addReadMoreClass();
 };
 
@@ -92,9 +73,11 @@ outputWrapper.addEventListener('click', async (event) => {
     const deleteButton = event.target.closest('.delete-transcript-btn');
     const copyButton = event.target.closest('.copy-transcript-btn');
     const editButton = event.target.closest('.edit-transcript-btn');
-    const readMoreButton = event.target.closest('p.read-more');
-    if (readMoreButton) {
-        readMoreButton.classList.remove('read-more');
+    const moreLessButton = event.target.closest('p.read-more, p.read-less');
+    // Toggle read more/less class
+    if (moreLessButton) {
+        moreLessButton.classList.toggle('read-more');
+        moreLessButton.classList.toggle('read-less');
     }
     // Action on click of the buttons
     if (copyButton) {

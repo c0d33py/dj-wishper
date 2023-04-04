@@ -14,6 +14,8 @@ class MediaField(models.Model):
 
     upload_file = GenericRelation('django_tus.TusFileModel', related_query_name='media_field')
     transcript = models.TextField()
+    language = models.CharField(max_length=50, default='en')
+    language_probability = models.FloatField(default=0.0)
 
     class Meta:
         verbose_name = 'media file'

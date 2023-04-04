@@ -3,11 +3,12 @@
 {% block body %}
 <link href="{% static 'uppy/uppy.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'uppy/uppy_custom.css' %}">
+<style>
 
+</style>
 <div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
     <h2>CBSTT</h2>
     <p>Real-time transcription playground.</p>
-    <i class="iconex iconex-broken-calendar"></i>
 
     <div class="file-upload">
         <div class="grid">
@@ -49,11 +50,10 @@
             </div>
         </div>
     </div>
-    <div id="output" class="mt-4"></div>
+    <div id="output" class="transcript-wrapper mt-4"></div>
 </div>
 {% endblock %}
 
 {% block extrascripts %}
-
 {% include 'script.html' %}
 {% endblock extrascripts %}

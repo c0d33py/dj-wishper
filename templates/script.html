@@ -1,7 +1,7 @@
 <script type="module">
     import { getCookie } from "/static/js/cookie.js"
     import { Uppy, FileInput, StatusBar, Tus } from "/static/uppy/uppy-module.min.js"
-    import { stripQueryStringAndHashFromPath, transcriptStripe, languageCheck } from "/static/js/sttData.js"
+    import { stripQueryStringAndHashFromPath, transcriptStripe } from "/static/js/sttData.js"
 
 
     const windowPath = window.location.href;
@@ -66,7 +66,6 @@
             if (data.transcript) {
                 if (sttParagraph) {
                     sttParagraph.textContent += data.transcript + " ";
-                    languageCheck();
                 } else {
                     transcriptWrapper.insertAdjacentHTML('afterbegin', transcriptStripe(data));
                 }

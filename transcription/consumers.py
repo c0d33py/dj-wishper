@@ -85,9 +85,10 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             # Get audio data from message
             audio_data = await self.receive_audio(file_id)
             # # Process audio data with Whisper
-            segments, info = self.stream.transcribe(audio_data, beam_size=5)
+            # self.stream.transcribe(audio_data, beam_size=5)
+            segments, info = await sync_to_async(self.stream.transcribe)(audio_data, beam_size=5)
             # Process the transcription results
-            await self.process_transcription(segments)
+            await self.process_transcription(segments, info.language, info.language_probability)
             # Delete the temporary audio file
             await sync_to_async(os.remove)(audio_data)
             # Close the WebSocket connection
@@ -104,7 +105,7 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
         await sync_to_async(self.tus_file.save)()
         return media_instance
 
-    async def process_transcription(self, segments):
+    async def process_transcription(self, segments, language, language_probability):
         # Get the media instance
         instance = await self.media_prepared()
         # Send transcription results back to client
@@ -115,11 +116,15 @@ class TranscriptConsumer(AsyncWebsocketConsumer):
             await self.send(json.dumps({
                 'id': instance.id,
                 'transcript': segment.text,
+                'language': language,
+                'language_probability': language_probability,
                 'alrt': 'Transcription complete',
                 'type': 'success'
             }))
         # Save the transcription instance
         instance.transcript = paragraph
+        instance.language = language
+        instance.language_probability = language_probability
         await sync_to_async(instance.save)()
 
     # async def test_func(self):
