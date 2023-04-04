@@ -26,7 +26,11 @@ function addReadMoreClass() {
         const lineHeight = parseInt(window.getComputedStyle(paragraphs[i]).lineHeight);
         const numLines = rect.height / lineHeight;
         if (numLines > 6) {
+            const showMore = document.createElement('span');
+            showMore.classList.add('stt-show-more');
+            showMore.textContent = 'More';
             paragraphs[i].classList.add('read-more');
+            paragraphs[i].parentNode.insertBefore(showMore, paragraphs[i].nextElementSibling);
         } else {
             let nextSibling = paragraphs[i].nextElementSibling;
             nextSibling.style.transform = "translate(102%, -50%)";
@@ -73,12 +77,15 @@ outputWrapper.addEventListener('click', async (event) => {
     const deleteButton = event.target.closest('.delete-transcript-btn');
     const copyButton = event.target.closest('.copy-transcript-btn');
     const editButton = event.target.closest('.edit-transcript-btn');
-    const moreLessButton = event.target.closest('p.read-more, p.read-less');
-    // Toggle read more/less class
-    if (moreLessButton) {
-        moreLessButton.classList.toggle('read-more');
-        moreLessButton.classList.toggle('read-less');
-    }
+    const showMoreButton = event.target.closest('.stt-show-more');
+
+    if (!showMoreButton) return;
+    const showMoreContent = showMoreButton.previousElementSibling;
+
+    if (!showMoreContent) return;
+    showMoreContent.classList.toggle('read-more');
+    showMoreButton.textContent = showMoreContent.classList.contains('read-more') ? 'More' : 'Less';
+
     // Action on click of the buttons
     if (copyButton) {
         const textToCopy = copyButton.closest('.stt-data').querySelector('p').textContent;
