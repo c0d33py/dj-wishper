@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<style>
+    .text-muted {
+        color: #727272 !important;
+    }
+</style>
+
+<div class="container-fluid h-100 py-5 text-bg-dark rounded-3">{% csrf_token %}
+    <h2>CBRUP</h2>
+    <p>ContentBazar Remote uploading protocol. <br>
+        <small class="text-muted">Upload files to your account using sFTP.</small>
+    </p>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <p>Use the following credentials to connect to your account.
+                <a class="credentials-edit" href="javascript:void(0)">
+                    <i class="iconex iconex-broken-pen1"></i>
+                </a>
+            </p>
+            <p>Host: <code>192.168.10.170</code></p>
+            <p>Port: <code>21</code></p>
+            <p>Username: <code>ftp.admin</code></p>
+            <p>Password: <code>testing1234</code></p>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <form action=".">
+                <input type="file" name="file" id="file" class="inputfile" />
+                <label for="file">Choose a file</label>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrascripts %}
+{% endblock extrascripts %}

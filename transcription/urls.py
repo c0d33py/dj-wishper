@@ -10,4 +10,5 @@ router.register('files', MediaFieldAPIView)
 urlpatterns = [
     path('', index, name='home-page'),
     path('api/', include(router.urls)),
+    path('ftp/', FtpStorgeView.as_view(), name='ftp-storage'),
 ]

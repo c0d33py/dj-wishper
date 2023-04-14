@@ -1,6 +1,6 @@
 from django.shortcuts import render
-# login required decorator
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 
 from rest_framework import viewsets, pagination
 
@@ -23,3 +23,7 @@ class MediaFieldAPIView(viewsets.ModelViewSet):
     serializer_class = FileSerializer
     queryset = MediaField.objects.all()
     pagination_class = CustomPagination
+
+
+class FtpStorgeView(TemplateView):
+    template_name = 'ftp_storage.html'
