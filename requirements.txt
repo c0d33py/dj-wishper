@@ -18,7 +18,7 @@ click-repl==0.2.0
 cmake==3.26.0
 constantly==15.1.0
 cron-descriptor==1.2.35
-cryptography==40.0.1
+cryptography==42.0.0
 ctranslate2==3.10.1
 daphne==4.0.0
 Django==4.1.7
