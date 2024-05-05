@@ -80,7 +80,7 @@ tiktoken==0.3.1
 tokenizers==0.13.2
 tomli==2.0.1
 torch==2.0.0
-tqdm==4.65.0
+tqdm==4.66.3
 triton==2.0.0
 Twisted==22.10.0
 txaio==23.1.1
