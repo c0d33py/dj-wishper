@@ -82,7 +82,7 @@ tomli==2.0.1
 torch==2.0.0
 tqdm==4.65.0
 triton==2.0.0
-Twisted==22.10.0
+Twisted==24.7.0rc1
 txaio==23.1.1
 typing_extensions==4.5.0
 tzdata==2022.7
