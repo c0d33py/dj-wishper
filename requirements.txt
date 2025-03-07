@@ -21,7 +21,7 @@ cron-descriptor==1.2.35
 cryptography==40.0.1
 ctranslate2==3.10.1
 daphne==4.0.0
-Django==4.1.7
+Django==4.2.20
 django-appconf==1.0.5
 django-celery-beat==2.5.0
 django-timezone-field==5.0
@@ -35,7 +35,7 @@ huggingface-hub==0.13.3
 hyperlink==21.0.0
 idna==3.4
 incremental==22.10.0
-Jinja2==3.1.2
+Jinja2==3.1.6
 joblib==1.2.0
 kombu==5.2.4
 lit==15.0.7
